@@ -21,6 +21,8 @@
 #define IMM1_INDEX          6
 #define IMM2_INDEX          7
 #define NUM_OF_CMD_FIELDS   7
+#define NUM_OF_OPCODES      21
+#define NUM_OF_REGISTERS    15
 
 #define MASK_IMM1           0xfff
 #define MASK_IMM2           0xfff   >>  12 
@@ -30,48 +32,23 @@
 #define MASK_RD             0xf     >>  36
 #define MASK_OPCODE         0xff    >>  40
 
+
+/* 
+ * TODO: 
+ * parse command into parts and enter command struct
+ */
+
 /* Structs and Enums*/
-enum reg_type { Zero, Imm, Result, Arg, Tmp, Save, GP, SP, RA };
-enum opcode { 
-    add  =   0, 
-    sub  =   1, 
-    mac  =   2, 
-    and  =   3,
-    or   =   4,
-    xor  =   5, 
-    sll  =   6, 
-    sra  =   7, 
-    srl  =   8, 
-    beq  =   9, 
-    bne  =   10, 
-    blt  =   11, 
-    bgt  =   12, 
-    ble  =   13, 
-    bge  =   14, 
-    jal  =   15, 
-    lw   =   16, 
-    sw   =   17, 
-    reti =   18, 
-    in   =   19, 
-    out  =   20, 
-    halt =   21
-};
-
-typedef struct {
-    int reg_number;
-    enum reg_type reg_type;
-    char *reg_name;
-} Register;
-
+typedef char* Register;
 typedef struct {
     int PC;
-    int Opcode;
-    int RD;
-    int RS;
-    int RT;
-    int RM;
-    int Imm1;
-    int Imm2;
+    char *Opcode;
+    char *RD;
+    char *RS;
+    char *RT;
+    char *RM;
+    char *Imm1;
+    char *Imm2;
     char *Lable;
     char *Note;
 } Command;
@@ -81,6 +58,50 @@ typedef struct {
     int PC;
 } Lable;
 
+char *opcodes[] = { 
+    "add",  /* 0 */
+    "sub",  /* 1 */
+    "mac",  /* 2 */
+    "and",  /* 3 */
+    "or",   /* 4 */
+    "xor",  /* 5 */
+    "sll",  /* 6 */
+    "sra",  /* 7 */
+    "srl",  /* 8 */
+    "beq",  /* 9 */
+    "bne",  /* 10 */
+    "blt",  /* 11 */
+    "bgt",  /* 12 */
+    "ble",  /* 13 */
+    "bge",  /* 14 */
+    "jal",  /* 15 */
+    "lw",   /* 16 */ 
+    "sw",   /* 17 */ 
+    "reti", /* 18 */
+    "in",   /* 19 */
+    "out",  /* 20 */ 
+    "halt"  /* 21 */
+};
+
+char *registers[] = { 
+    "$zero",  /* 0 */
+    "$imm1",  /* 1 */
+    "$imm2",  /* 2 */
+    "$v0",    /* 3 */
+    "$a0",    /* 4 */
+    "$a1",    /* 5 */
+    "$a2",    /* 6 */
+    "$t0",    /* 7 */
+    "$t1",    /* 8 */
+    "$t2",    /* 9 */
+    "$s0",    /* 10 */
+    "$s1",    /* 11 */
+    "$s2",    /* 12 */
+    "$sp",    /* 13 */
+    "$gp",    /* 14 */
+    "$ra"     /* 15 */
+};
+
 /* Debug functions */
 void printCMD( Command *CMD );
 void printReg( Register reg );
@@ -88,7 +109,7 @@ void hex2dec();
 void dec2hex();
 
 /* Assembler Input/Output */
-void setCommand( Command *CMD, int cmdPart, char *CMDArg );
+void setCommand( Command *CMD, char **CMDArg );
 void setLable2PCDB( FILE file );
 void parseLine( Command *CMD, char *line, int *pc );
 void print_imemin( void );
@@ -97,31 +118,3 @@ void print_dmemin( void );
 
 /* Assembler Commands - move to simulator */
 int setBinaryCommand( Command cmd );
-/*
-void add( Command cmd );
-void sub( Command cmd );
-void mac( Command cmd );
-void and( Command cmd );
-void or( Command cmd );
-void xor( Command cmd );
-void sll( Command cmd );
-void sra( Command cmd );
-void srl( Command cmd );
-void beq( Command cmd );
-void bne( Command cmd );
-void blt( Command cmd );
-void bgt( Command cmd );
-void ble( Command cmd );
-void bge( Command cmd );
-void jal( Command cmd );
-void lw( Command cmd );
-void sw( Command cmd );
-void reti( Command cmd );
-void in( Command cmd );
-void out( Command cmd );
-void halt( Command cmd );
-*/
-
-
-
-
