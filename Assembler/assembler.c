@@ -6,61 +6,90 @@ static int lableIndex = 0;
 static Command *CommandDB[ MAX_NUM_OF_COMMANDS ] = { 0 };
 static int cmdIndex = 0;
 
-void setCommand( Command *CMD, int cmdPart, char *CMDArg ) {
-    cmdPart = 0;
-    CMDArg = 0;
-    /* TODO: Parse from string to Registers, opcodes and so on .. */
-    /* 
-    CMD->PC = 0;
-    Register newRegister = { 0 };
-    
-    switch ( cmdPart ) {
+void setCommand( Command *CMD, char **CMDArgs ) {
+    for (int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++) {
+        char *cleanCMDArg = strtok( CMDArgs[ cmdPart ], " \t");
+
+        switch ( cmdPart ) {
         case OPCODE_INDEX:
-            opcode newOP;
-            strcpy( CMD->opcode, CMDArg );
+            for ( int i = 0; i < NUM_OF_OPCODES; i++) {
+                if ( strcmp( cleanCMDArg, opcodes[ i ]) == 0 ) {
+                    CMD->Opcode = cleanCMDArg;
+                    printf("in switch - OPCODE: %s\n", CMD->Opcode); /* TODO: debug */
+                    break;
+                }
+            }
             break;
         case RD_INDEX:
-            CMD->RD;
+            for ( int i = 0; i < NUM_OF_REGISTERS; i++ ) {
+                if ( strcmp( cleanCMDArg, registers[ i ]) == 0 ) {
+                    CMD->RD = cleanCMDArg;
+                    printf("in switch - RD: %s\n", CMD->RD); /* TODO: debug */
+                    break;
+                }
+            }
             break;
         case RS_INDEX:
-            strcpy( CMD->RS, CMDArg );
+            for ( int i = 0; i < NUM_OF_REGISTERS; i++ ) {
+                if ( strcmp( cleanCMDArg, registers[ i ]) == 0 ) {
+                    CMD->RS = cleanCMDArg;
+                    printf("in switch - RS: %s\n", CMD->RS); /* TODO: debug */
+                    break;
+                }
+            }
             break;
         case RT_INDEX:
-            strcpy( CMD->RT, CMDArg );
+            for ( int i = 0; i < NUM_OF_REGISTERS; i++ ) {
+                if ( strcmp( cleanCMDArg, registers[ i ]) == 0 ) {
+                    CMD->RT = cleanCMDArg;
+                    printf("in switch - RT: %s\n", CMD->RT); /* TODO: debug */
+                    break;
+                }
+            }
             break;
         case RM_INDEX:
-            strcpy( CMD->RM, CMDArg );
+            for ( int i = 0; i < NUM_OF_REGISTERS; i++ ) {
+                if ( strcmp( cleanCMDArg, registers[ i ]) == 0 ) {
+                    CMD->RM = cleanCMDArg;
+                    printf("in switch - RM: %s\n", CMD->RM); /* TODO: debug */
+                    break;
+                }
+            }
             break;
-        case IMM1_INDEX:
-            strcpy( CMD->Imm1, CMDArg );
+        case IMM1_INDEX: // keep in string and handle in second round 
+            CMD->Imm1 = cleanCMDArg;
+            printf("in switch - Imm1: %s\n", CMD->Imm1); /* TODO: debug */
             break;
         case IMM2_INDEX:
-            strcpy( CMD->Imm2, CMDArg );
+            CMD->Imm2 = cleanCMDArg;
+            printf("in switch - Imm2: %s\n", CMD->Imm2); /* TODO: debug */
             break;
         default:
             printf("ERROR: too many arguments!\n");
             exit( 1 ); // How to exit in case of error?
     }
-    */
+
+    }
 }
 
 void printCMD( Command *CMD ) { /* TODO: debug */
     printf("#######################\n");
     printf("PC: %d\n", CMD->PC );
-    printf("Opcode: %d\n", CMD->Opcode );
-    printf("RD: %d\n", CMD->RD );
-    printf("RS: %d\n", CMD->RS );
-    printf("RT: %d\n", CMD->RT );
-    printf("RM: %d\n", CMD->RM );
-    printf("Imm1: %d\n", CMD->Imm1 );
-    printf("Imm2: %d\n", CMD->Imm2 );
+    printf("Opcode: %s\n", CMD->Opcode );
+    printf("RD: %s\n", CMD->RD );
+    printf("RS: %s\n", CMD->RS );
+    printf("RT: %s\n", CMD->RT );
+    printf("RM: %s\n", CMD->RM );
+    printf("Imm1: %s\n", CMD->Imm1 );
+    printf("Imm2: %s\n", CMD->Imm2 );
     printf("Lable: %s\n", CMD->Lable );
     printf("Note: %s\n", CMD->Note );
     printf("#######################\n");
 }
 
 void parseLine( Command *CMD, char *line, int *PC ) { /* TODO: try again */
-    char *lableName, *fullCommand, *note, *token, *token2, *partialCommand;
+    char *lableName, *fullCommand, *note, *token, *token2;
+    char *commandStrings[ NUM_OF_CMD_FIELDS ] = { 0 };
     int cmdPartIndex;
     
     /* Split line into lable+command and note */
@@ -69,9 +98,7 @@ void parseLine( Command *CMD, char *line, int *PC ) { /* TODO: try again */
         /* empty line or line with comment only - ignore and contine to next line */
         return;
     }
-    printf("token: %s\n", token); /* TODO: debug */
     note = strtok( NULL, "#" );
-    printf("note: %s\n", note); /* TODO: debug */
     if ( note != NULL ) { /* line with comment */
         /* TODO: debug why crush 
         CMD->Note = note;
@@ -84,37 +111,35 @@ void parseLine( Command *CMD, char *line, int *PC ) { /* TODO: try again */
     printf("lableName: %s\n", lableName); /* TODO: debug */
     fullCommand = strtok( NULL, ":" );
     printf("fullCommand before if: %s\n", fullCommand); /* TODO: debug */
-    if ( fullCommand != NULL ) { /* Lable found */
+    
+    if ( fullCommand != NULL ) { 
         Lable newLable = { 0 };
         newLable.Lable_name = lableName;
         newLable.PC = *PC;
         Lable2PC[ lableIndex ++ ];
-    } else { /* Lable not found, set command into fullCommand */
+    } else {
         fullCommand = lableName;
     }
     printf("fullCommand after if: %s\n", fullCommand); /* TODO: debug */
 
     /* Split command into opcode, registers, imms... */
-    cmdPartIndex = 2;
     token = strtok( fullCommand, "," );
-    printf("opcode and first reg: %s\n", token); /* TODO: debug */
+
+    cmdPartIndex = 3;
     token2 = strtok( NULL, "," );
-    printf("token2: %s\tcmdPartIndex: %d\n", token2, cmdPartIndex ); /* TODO: debug */
     while ( token2 != NULL ) { /* Set the rest of command */
-        setCommand( CMD, cmdPartIndex++, token2 );
-        printf("token2: %s\tcmdPartIndex: %d\n", token2, cmdPartIndex ); /* TODO: debug */
+        commandStrings[ cmdPartIndex++ ] = token2;
         token2 = strtok( NULL, "," );
     }
     token2 = strtok( token, " ");
-    printf("opcode: %s\n", token2 ); /* TODO: debug */
-    setCommand( CMD, OPCODE_INDEX, token2 ); /* Set opcode */
-    token2 = strtok( NULL, ","); /* Set first register */
-    printf("first reg: %s\n", token2 ); /* TODO: debug */
-    setCommand( CMD, RD_INDEX, token2 ); /* Set opcode */
+    commandStrings[ OPCODE_INDEX ] = token2; /* Set OPCODE register */
+    token2 = strtok( NULL, ","); 
+    commandStrings[ RD_INDEX ] = token2; /* Set RD register */
+    setCommand( CMD, commandStrings );
 
-    /*CMD->PC = *PC;*/ /* TODO: debug why crush */
+    CMD->PC = *PC; 
     CommandDB[ cmdIndex++ ] = CMD;
-    /* printCMD( CMD ); */
+    printCMD( CMD );
 }
 
 int main( int argc, char *argv[] ) {
@@ -128,12 +153,12 @@ int main( int argc, char *argv[] ) {
     int PC = 0; /* starting from 0 or 1? */
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
         printf("line: %s\n", line );
-        Command *CMD = { 0 };
-        parseLine( CMD, line, &PC );
+        Command CMD = { 0 };
+        parseLine( &CMD, line, &PC );
     }    
     fclose( file );
 
-    /* Replace Lables with the correct pc */
+    /* Replace Lables with the correct pc - Garibi */
 
     return 0;
 }
