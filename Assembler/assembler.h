@@ -21,8 +21,8 @@
 #define IMM1_INDEX          6
 #define IMM2_INDEX          7
 #define NUM_OF_CMD_FIELDS   7
-#define NUM_OF_OPCODES      21
-#define NUM_OF_REGISTERS    15
+#define NUM_OF_OPCODES      22
+#define NUM_OF_REGISTERS    16
 
 #define MASK_IMM1           0xfff
 #define MASK_IMM2           0xfff   >>  12 
@@ -32,21 +32,15 @@
 #define MASK_RD             0xf     >>  36
 #define MASK_OPCODE         0xff    >>  40
 
-
-/* 
- * TODO: 
- * parse command into parts and enter command struct
- */
-
 /* Structs and Enums*/
 typedef char* Register;
 typedef struct {
     int PC;
-    char *Opcode;
-    char *RD;
-    char *RS;
-    char *RT;
-    char *RM;
+    int Opcode;
+    int RD;
+    int RS;
+    int RT;
+    int RM;
     char *Imm1;
     char *Imm2;
     char *Lable;
@@ -57,6 +51,11 @@ typedef struct {
     char *Lable_name;
     int PC;
 } Lable;
+
+typedef struct {
+    char *location;
+    char *value;
+} Memory;
 
 char *opcodes[] = { 
     "add",  /* 0 */
@@ -104,17 +103,15 @@ char *registers[] = {
 
 /* Debug functions */
 void printCMD( Command *CMD );
-void printReg( Register reg );
-void hex2dec();
-void dec2hex();
 
 /* Assembler Input/Output */
 void setCommand( Command *CMD, char **CMDArg );
-void setLable2PCDB( FILE file );
-void parseLine( Command *CMD, char *line, int *pc );
+void parseLine( Command *CMD, char *line );
+bool isLineValid( char *line );
+bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
+void setLable( Command *CMD, char *lableName );
+void setMemory( char *line );
 void print_imemin( void );
 void print_dmemin( void );
-
-
-/* Assembler Commands - move to simulator */
 int setBinaryCommand( Command cmd );
+bool isLableFound( char *command );
