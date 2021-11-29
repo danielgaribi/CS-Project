@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+
 #define _POSIX_C_SOURCE 200809L
 
 /* Defines and Macros*/
@@ -21,16 +23,36 @@
 #define IMM1_INDEX          6
 #define IMM2_INDEX          7
 #define NUM_OF_CMD_FIELDS   7
-#define NUM_OF_OPCODES      21
-#define NUM_OF_REGISTERS    15
+#define NUM_OF_OPCODES      22
+#define NUM_OF_REGISTERS    16
+#define CMD_LENGTH_HEX      12
+#define MEM_LENGTH_HEX      8
 
-#define MASK_IMM1           0xfff
-#define MASK_IMM2           0xfff   >>  12 
-#define MASK_RM             0xf     >>  24
-#define MASK_RT             0xf     >>  28
-#define MASK_RS             0xf     >>  32
-#define MASK_RD             0xf     >>  36
-#define MASK_OPCODE         0xff    >>  40
+#define SHIFT_IMM1           0
+#define SHIFT_IMM2           12 
+#define SHIFT_RM             24
+#define SHIFT_RT             28
+#define SHIFT_RS             32
+#define SHIFT_RD             36
+#define SHIFT_OPCODE         40
+
+#define MASK_IMM1           0xfff   <<  SHIFT_IMM1
+#define MASK_IMM2           0xfff   <<  SHIFT_IMM2 
+#define MASK_RM             0xf     <<  SHIFT_RM
+#define MASK_RT             0xf     <<  SHIFT_RT
+#define MASK_RS             0xf     <<  SHIFT_RS
+#define MASK_RD             0xf     <<  SHIFT_RD
+#define MASK_OPCODE         0xff    <<  SHIFT_OPCODE
+
+#define SET_CMD_COMP(_cmd, _comp, _mask, _shift)    (_cmd) = ((_cmd) & (~(_mask))) | ((_comp) << (_shift))
+
+#define SET_IMM1(_cmd, _imm1)                       SET_CMD_COMP((_cmd), (_imm1),   MASK_IMM1,   SHIFT_IMM1)
+#define SET_IMM2(_cmd, _imm2)                       SET_CMD_COMP((_cmd), (_imm2),   MASK_IMM2,   SHIFT_IMM2)
+#define SET_RM(_cmd, _rm)                           SET_CMD_COMP((_cmd), (_rm),     MASK_RM,     SHIFT_RM)
+#define SET_RT(_cmd, _rt)                           SET_CMD_COMP((_cmd), (_rt),     MASK_RT,     SHIFT_RT)
+#define SET_RS(_cmd, _rs)                           SET_CMD_COMP((_cmd), (_rs),     MASK_RS,     SHIFT_RS)
+#define SET_RD(_cmd, _rd)                           SET_CMD_COMP((_cmd), (_rd),     MASK_RD,     SHIFT_RD)
+#define SET_OPCODE(_cmd, _opcode)                   SET_CMD_COMP((_cmd), (_opcode), MASK_OPCODE, SHIFT_OPCODE)
 
 
 /* 
@@ -112,9 +134,10 @@ void dec2hex();
 void setCommand( Command *CMD, char **CMDArg );
 void setLable2PCDB( FILE file );
 void parseLine( Command *CMD, char *line, int *pc );
-void print_imemin( void );
-void print_dmemin( void );
+void print_imemin( char *imemin_file );
+void print_dmemin( char *dmemin_file );
 
 
 /* Assembler Commands - move to simulator */
-int setBinaryCommand( Command cmd );
+int parse_cmd_to_int( Command cmd );
+int convert_imm_to_int(char *imm);

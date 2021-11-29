@@ -142,11 +142,111 @@ void parseLine( Command *CMD, char *line, int *PC ) { /* TODO: try again */
     printCMD( CMD );
 }
 
+int parse_cmd_to_int( Command cmd ) {
+    uint64_t bin_cmd = 0;
+    int imm1, imm2;
+
+    imm1 = convert_imm_to_int(cmd.Imm1);
+    imm2 = convert_imm_to_int(cmd.Imm2);
+
+    SET_IMM1(bin_cmd, imm1);
+    SET_IMM2(bin_cmd, imm2);
+    SET_RM(bin_cmd, cmd.RM);
+    SET_RT(bin_cmd, cmd.RT);
+    SET_RS(bin_cmd, cmd.RS);
+    SET_RD(bin_cmd, cmd.RD);
+    SET_OPCODE(bin_cmd, cmd.Opcode);
+
+    return bin_cmd;
+}
+
+int convert_imm_to_int(char *imm) {
+    int i;
+    
+    /** Check if imm is label, if so return label's pc */ 
+    for (i = 0; i < DB_MAX_NUM_LABLES; i++) {
+        if (Lable2PC[ i ].Lable_name == NULL) {
+            break;
+        }
+        if (strcmp(Lable2PC[ i ].Lable_name, imm) == 0) { /** if imm is label i */
+            return Lable2PC[ i ].PC;
+        }
+    }
+    
+    return (int)strtol(imm, NULL, 0);
+}
+
+void print_imemin( char *imemin_file ) {
+    int i;
+    int cmd;
+    char cmd_string[CMD_LENGTH_HEX];
+    FILE *file = fopen(imemin_file, "w+");
+
+    for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
+        cmd = parse_cmd_to_int(*(CommandDB[i]));
+        sprintf(cmd_string, "%x", cmd);
+        fputs(cmd_string, file);
+    }
+
+    fclose(file);
+}
+
+void get_memory_array(char **memory, int *size) {
+    *size = 0;
+    int i;
+
+    for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
+        if (MemoryDB[i] == NULL) {
+            break;
+        }
+        if(MemoryDB[i] -> loc > *size) {
+            *size = MemoryDB[i] -> loc;
+        }
+    }
+    *size += 1
+
+    memory = (char **) calloc(*size), sizeof(char*));
+    assert(memory != NULL);
+
+    for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
+        if (MemoryDB[i] == NULL) {
+            break;
+        }
+        memory[MemoryDB[i] -> loc] = MemoryDB[i] -> value;
+        
+    }
+
+    return memory;
+}
+
+void print_dmemin( char *dmemin_file ) {
+    int size;
+    char **memory;
+    FILE *file;
+    char mem_value_string[MEM_LENGTH_HEX];
+
+    get_memory_array(memory, &size);
+    file = fopen(dmemin_file, "w+");
+
+    for (i = 0; i < size; i++) {
+        sprintf(mem_value_string, "%x", memory[i]);
+        fputs(mem_value_string, file);
+    }
+
+    fclose(file);
+    free(memory);
+}
+
+
 int main( int argc, char *argv[] ) {
+    char *asm_file_name, *imemin_file, *dmemin_file;
     /* Read program.asm (program file) - find labels's pc and update Lable2PC DB */
     assert( argc == 2 );
+    asm_file_name = argv[1];
+    imemin_file = argv[2];
+    dmemin_file = argv[3];
 
-    FILE *file = fopen( argv[1], "r");
+    FILE *file = fopen( asm_file_name, "r");
     assert( file != NULL );
 
     char line[ BUFFER_MAX_SIZE ];
@@ -159,6 +259,8 @@ int main( int argc, char *argv[] ) {
     fclose( file );
 
     /* Replace Lables with the correct pc - Garibi */
+    print_imemin(imemin_file);
+    print_dmemin(dmemin_file);
 
     return 0;
 }
