@@ -106,7 +106,7 @@ void printLableDB( void ) {
 }
 
 void printMemory( Memory *memory ) {
-    printf("location: %s\t", memory->location );
+    printf("location: %d\t", memory->location );
     printf("value: %s\n", memory->value );
 }
 
@@ -157,7 +157,7 @@ void setMemory( char *line ) {
         printf("command with dot and not .word found!\n"); /* TODO: debug */
         return;
     }
-    newMemory.location = strtok( NULL, " ");
+    newMemory.location = (int)strtol(strtok( NULL, " "), NULL, 0);
     newMemory.value = strtok( NULL, " ");
     MemoryDB[ memIndex++ ] = &newMemory;
 }
@@ -229,7 +229,7 @@ void parseLine( Command *CMD, char *line ) {
     printCMD( CMD );
 }
 
-int parse_cmd_to_int( Command cmd ) {
+uint64_t parse_cmd_to_uint64_t( Command cmd ) {
     uint64_t bin_cmd = 0;
     int imm1, imm2;
 
@@ -252,11 +252,11 @@ int convert_imm_to_int(char *imm) {
     
     /** Check if imm is label, if so return label's pc */ 
     for (i = 0; i < DB_MAX_NUM_LABLES; i++) {
-        if (Lable2PC[ i ].Lable_name == NULL) {
+        if (LableDB[ i ] == NULL) {
             break;
         }
-        if (strcmp(Lable2PC[ i ].Lable_name, imm) == 0) { /** if imm is label i */
-            return Lable2PC[ i ].PC;
+        if (strcmp(LableDB[ i ]->Lable_name, imm) == 0) { /** if imm is label i */
+            return LableDB[ i ]->PC;
         }
     }
     
@@ -265,59 +265,63 @@ int convert_imm_to_int(char *imm) {
 
 void print_imemin( char *imemin_file ) {
     int i;
-    int cmd;
-    char cmd_string[CMD_LENGTH_HEX];
+    uint64_t cmd;
+    char cmd_string[CMD_LENGTH_HEX+1];
     FILE *file = fopen(imemin_file, "w+");
 
     for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
-        cmd = parse_cmd_to_int(*(CommandDB[i]));
-        sprintf(cmd_string, "%x", cmd);
+        if (CommandDB[i] == NULL) {
+            break;
+        }
+        cmd = parse_cmd_to_uint64_t(*(CommandDB[i]));
+        sprintf(cmd_string, "%012lx", cmd);
         fputs(cmd_string, file);
+        fputs("\r\n", file);
     }
 
     fclose(file);
 }
 
-void get_memory_array(char **memory, int *size) {
+void get_memory_array(int **memory, int *size) {
+    int loc, i;
     *size = 0;
-    int i;
 
     for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
         if (MemoryDB[i] == NULL) {
             break;
         }
-        if(MemoryDB[i] -> loc > *size) {
-            *size = MemoryDB[i] -> loc;
+        if(MemoryDB[i] -> location > *size) {
+            *size = MemoryDB[i] -> location;
         }
     }
-    *size += 1
+    *size += 1;
 
-    memory = (char **) calloc(*size), sizeof(char*));
-    assert(memory != NULL);
+    *memory = (int*) calloc(*size, sizeof(int));
+    assert(*memory != NULL);
 
     for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
         if (MemoryDB[i] == NULL) {
             break;
         }
-        memory[MemoryDB[i] -> loc] = MemoryDB[i] -> value;
-        
-    }
+        loc = MemoryDB[i] -> location;
 
-    return memory;
+        (*memory)[loc] = (int)strtol(MemoryDB[i] -> value, NULL, 0);
+    }
 }
 
 void print_dmemin( char *dmemin_file ) {
-    int size;
-    char **memory;
+    int size, i;
+    int *memory = NULL;
     FILE *file;
-    char mem_value_string[MEM_LENGTH_HEX];
+    char mem_value_string[MEM_LENGTH_HEX+1];
 
-    get_memory_array(memory, &size);
+    get_memory_array(&memory, &size);
     file = fopen(dmemin_file, "w+");
 
     for (i = 0; i < size; i++) {
-        sprintf(mem_value_string, "%x", memory[i]);
+        sprintf(mem_value_string, "%08x", memory[i]);
         fputs(mem_value_string, file);
+        fputs("\r\n", file);
     }
 
     fclose(file);
@@ -328,7 +332,7 @@ void print_dmemin( char *dmemin_file ) {
 int main( int argc, char *argv[] ) {
     char *asm_file_name, *imemin_file, *dmemin_file;
     /* Read program.asm (program file) - find labels's pc and update Lable2PC DB */
-    assert( argc == 2 );
+    assert( argc == 4 );
     asm_file_name = argv[1];
     imemin_file = argv[2];
     dmemin_file = argv[3];
@@ -340,9 +344,30 @@ int main( int argc, char *argv[] ) {
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
         printf("line: %s\n", line );
         Command CMD = { 0 };
-        parseLine( &CMD, line, &PC );
+        parseLine( &CMD, line );
     }    
     fclose( file );
+
+    /* test data for im print */
+    // CommandDB[0] = (Command*) malloc(sizeof(Command));
+    // CommandDB[0]->PC = 0;
+    // CommandDB[0]->Opcode = 13;
+    // CommandDB[0]->RD = 4;
+    // CommandDB[0]->RS = 3;
+    // CommandDB[0]->RT = 2;
+    // CommandDB[0]->RM = 1;
+    // CommandDB[0]->Imm1 = "5";
+    // CommandDB[0]->Imm2 = "10";
+
+    // CommandDB[1] = (Command*) malloc(sizeof(Command));
+    // CommandDB[1]->PC = 1;
+    // CommandDB[1]->Opcode = 12;
+    // CommandDB[1]->RD = 5;
+    // CommandDB[1]->RS = 6;
+    // CommandDB[1]->RT = 7;
+    // CommandDB[1]->RM = 8;
+    // CommandDB[1]->Imm1 = "0xff";
+    // CommandDB[1]->Imm2 = "0x9";
     
     printf("print DBs status\n");
 
