@@ -133,7 +133,7 @@ void printCMD( Command *CMD );
 
 /* Assembler Input/Output */
 void setCommand( Command *CMD, char **CMDArg );
-void parseLine( Command *CMD, char *line );
+void parseLine( char *line );
 bool isLineValid( char *line );
 void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
