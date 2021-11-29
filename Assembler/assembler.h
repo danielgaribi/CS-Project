@@ -64,11 +64,11 @@
 typedef char* Register;
 typedef struct {
     int PC;
-    char *Opcode;
-    char *RD;
-    char *RS;
-    char *RT;
-    char *RM;
+    int Opcode;
+    int RD;
+    int RS;
+    int RT;
+    int RM;
     char *Imm1;
     char *Imm2;
     char *Lable;
@@ -79,6 +79,11 @@ typedef struct {
     char *Lable_name;
     int PC;
 } Lable;
+
+typedef struct {
+    char *location;
+    char *value;
+} Memory;
 
 char *opcodes[] = { 
     "add",  /* 0 */
@@ -126,18 +131,17 @@ char *registers[] = {
 
 /* Debug functions */
 void printCMD( Command *CMD );
-void printReg( Register reg );
-void hex2dec();
-void dec2hex();
 
 /* Assembler Input/Output */
 void setCommand( Command *CMD, char **CMDArg );
+void parseLine( Command *CMD, char *line );
+bool isLineValid( char *line );
 void setLable2PCDB( FILE file );
-void parseLine( Command *CMD, char *line, int *pc );
+bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
+void setLable( Command *CMD, char *lableName );
+void setMemory( char *line );
 void print_imemin( char *imemin_file );
 void print_dmemin( char *dmemin_file );
-
-
-/* Assembler Commands - move to simulator */
 int parse_cmd_to_int( Command cmd );
 int convert_imm_to_int(char *imm);
+bool isLableFound( char *command );
