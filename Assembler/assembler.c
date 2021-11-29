@@ -139,7 +139,10 @@ bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isD
 }
 
 bool isLineValid( char *line ) {
-    return TRUE; /* TODO change */
+    if ( line[0] == '\n' || line[0] == '#' ) {
+        return FALSE;
+    }
+    return TRUE; 
 }
 
 void setLable( Command *CMD, char *lableName ) {
@@ -246,7 +249,7 @@ int main( int argc, char *argv[] ) {
 
     printf("print DBs status\n");
 
-    /* printCommandDB(); */
+    printCommandDB();
     printf("chack 1\n");
     /* printLableDB(); */
     printf("chack 2\n");
