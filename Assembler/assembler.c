@@ -7,7 +7,6 @@ static Command *CommandDB[ MAX_NUM_OF_COMMANDS ] = { 0 };
 static int GlobalPC = 0;
 static Memory *MemoryDB[ MAX_NUM_OF_COMMANDS ];
 static int memIndex = 0;
-static int PC = 0; 
 
 void setCommand( Command *CMD, char **CMDArgs ) {
     for ( int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++ ) {
@@ -90,12 +89,12 @@ void printCommandDB( void ) {
     }
 }
 
-void printLable( Lable *lable ) {
+void printLable( Lable *lable ) { /* Not tested yet */
     printf("Lable_name: %s\t", lable->Lable_name );
     printf("PC: %d\n", lable->PC );
 }
 
-void printLableDB( void ) {
+void printLableDB( void ) { /* Not tested yet */
     printf("Lable_name:\t PC:\n");
     for ( int i = 0; i < DB_MAX_NUM_LABLES; i++ ) {
         if ( LableDB[ i ] == NULL ) {
@@ -105,12 +104,12 @@ void printLableDB( void ) {
     }
 }
 
-void printMemory( Memory *memory ) {
+void printMemory( Memory *memory ) { /* Not tested yet */
     printf("location: %d\t", memory->location );
     printf("value: %s\n", memory->value );
 }
 
-void printMemoryDB( void ) {
+void printMemoryDB( void ) { /* Not tested yet */
     for ( int i = 0; i < DB_MAX_NUM_LABLES; i++ ) {
         if ( MemoryDB[ i ] == NULL ) {
             return;
@@ -142,6 +141,7 @@ bool isLineValid( char *line ) {
     if ( line[0] == '\n' || line[0] == '#' ) {
         return FALSE;
     }
+    /* TODO: Do not support line with spaces / tabs and than '#' */
     return TRUE; 
 }
 
@@ -149,7 +149,7 @@ void setLable( Command *CMD, char *lableName ) {
     CMD->Lable = lableName;
     Lable newLable = { 0 };
     newLable.Lable_name = lableName;
-    newLable.PC = PC;
+    newLable.PC = GlobalPC + 1; /* TODO: check if +1 is requiered */
     LableDB[ lableIndex++ ] = &newLable;
 }
 
@@ -187,11 +187,11 @@ void parseLine( char *line ) {
     bool isCMDFound = FALSE;
     bool isDotWordFound = FALSE;
     classifiedCMD( token, &isLableFound, &isCMDFound, &isDotWordFound );
-    if ( isLableFound && !isCMDFound ) {
+    if ( isLableFound ) {
         lableName = strtok( token, ":" );
         setLable( CMD, lableName );
         if ( !isCMDFound ) {
-            printCMD( CMD );
+            printCMD( CMD ); /* TODO: debug */
             return;
         } else {
             fullCommand = strtok( NULL, ":" );
@@ -218,9 +218,9 @@ void parseLine( char *line ) {
     commandStrings[ RD_INDEX ] = token2; /* Set RD register */
     setCommand( CMD, commandStrings );
 
-    CMD->PC = PC++; 
+    CMD->PC = GlobalPC; 
     CommandDB[ GlobalPC++ ] = CMD;
-    printCMD(CommandDB[ GlobalPC - 1 ]);
+    printCMD( CommandDB[ GlobalPC - 1 ] ); /* TODO: debug */
 }
 
 uint64_t parse_cmd_to_uint64_t( Command cmd ) {
@@ -369,6 +369,5 @@ int main( int argc, char *argv[] ) {
     /* Replace Lables with the correct pc - Garibi */
     print_imemin(imemin_file);
     print_dmemin(dmemin_file);
-
     return 0;
 }
