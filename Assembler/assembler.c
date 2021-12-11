@@ -4,10 +4,9 @@
 static Lable *LableDB[ DB_MAX_NUM_LABLES ] = { 0 };
 static int lableIndex = 0;
 static Command *CommandDB[ MAX_NUM_OF_COMMANDS ] = { 0 };
-static int cmdIndex = 0;
+static int GlobalPC = 0;
 static Memory *MemoryDB[ MAX_NUM_OF_COMMANDS ];
 static int memIndex = 0;
-static int PC = 0; 
 
 void setCommand( Command *CMD, char **CMDArgs ) {
     for ( int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++ ) {
@@ -90,12 +89,12 @@ void printCommandDB( void ) {
     }
 }
 
-void printLable( Lable *lable ) {
+void printLable( Lable *lable ) { /* Not tested yet */
     printf("Lable_name: %s\t", lable->Lable_name );
     printf("PC: %d\n", lable->PC );
 }
 
-void printLableDB( void ) {
+void printLableDB( void ) { /* Not tested yet */
     printf("Lable_name:\t PC:\n");
     for ( int i = 0; i < DB_MAX_NUM_LABLES; i++ ) {
         if ( LableDB[ i ] == NULL ) {
@@ -105,12 +104,12 @@ void printLableDB( void ) {
     }
 }
 
-void printMemory( Memory *memory ) {
+void printMemory( Memory *memory ) { /* Not tested yet */
     printf("location: %d\t", memory->location );
     printf("value: %s\n", memory->value );
 }
 
-void printMemoryDB( void ) {
+void printMemoryDB( void ) { /* Not tested yet */
     for ( int i = 0; i < DB_MAX_NUM_LABLES; i++ ) {
         if ( MemoryDB[ i ] == NULL ) {
             return;
@@ -139,14 +138,18 @@ bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isD
 }
 
 bool isLineValid( char *line ) {
-    return TRUE; /* TODO change */
+    if ( line[0] == '\n' || line[0] == '#' ) {
+        return FALSE;
+    }
+    /* TODO: Do not support line with spaces / tabs and than '#' */
+    return TRUE; 
 }
 
 void setLable( Command *CMD, char *lableName ) {
     CMD->Lable = lableName;
     Lable newLable = { 0 };
     newLable.Lable_name = lableName;
-    newLable.PC = PC;
+    newLable.PC = GlobalPC + 1; /* TODO: check if +1 is requiered */
     LableDB[ lableIndex++ ] = &newLable;
 }
 
@@ -162,40 +165,36 @@ void setMemory( char *line ) {
     MemoryDB[ memIndex++ ] = &newMemory;
 }
 
-void parseLine( Command *CMD, char *line ) { 
+void parseLine( char *line ) { 
     char *lableName, *fullCommand, *note, *token, *token2;
     char *commandStrings[ NUM_OF_CMD_FIELDS ] = { 0 };
     int cmdPartIndex;
+    CommandDB[ GlobalPC ] = ( Command * )calloc( 1, sizeof( Command ) );
+    Command *CMD = CommandDB[ GlobalPC ];
     if ( isLineValid( line ) == FALSE ) {
         return;
     }
 
     /* Split line into lable+command and note */
     token = strtok( line, "#");
-    printf("token: %s\n", token );
     note = strtok( NULL, "#" );
     if ( note != NULL ) { /* line with comment */
         CMD->Note = note;
     }
-    printf("after #: token = '%s'\n", token); /* TODO: debug */
-    printf("after #: note = '%s'\n", note); /* TODO: debug */
 
     /* Split lable+command to 2 seperated parts */
     bool isLableFound = FALSE;
     bool isCMDFound = FALSE;
     bool isDotWordFound = FALSE;
     classifiedCMD( token, &isLableFound, &isCMDFound, &isDotWordFound );
-    printf("isLableFound: %d\tisCMDFound: %d\n", isLableFound, isCMDFound); /* TODO: debug */
-    if ( isLableFound && !isCMDFound ) {
+    if ( isLableFound ) {
         lableName = strtok( token, ":" );
         setLable( CMD, lableName );
         if ( !isCMDFound ) {
-            printCMD( CMD );
+            printCMD( CMD ); /* TODO: debug */
             return;
         } else {
             fullCommand = strtok( NULL, ":" );
-            printf("after ':': lableName = '%s'\n", lableName); /* TODO: debug */
-            printf("after ':': fullCommand = '%s'\n", fullCommand); /* TODO: debug */
         }
     } else if ( isDotWordFound ) {
         setMemory( line );
@@ -203,8 +202,6 @@ void parseLine( Command *CMD, char *line ) {
     } else {
         fullCommand = token;
     }
-
-    printf("after if: fullCommand = '%s'\n", fullCommand); /* TODO: debug */
 
     /* Split command into opcode, registers, imms... */
     token = strtok( fullCommand, "," );
@@ -221,12 +218,9 @@ void parseLine( Command *CMD, char *line ) {
     commandStrings[ RD_INDEX ] = token2; /* Set RD register */
     setCommand( CMD, commandStrings );
 
-    CMD->PC = PC++; 
-    CommandDB[ cmdIndex++ ] = CMD;
-    printf("in array\n");
-    printCMD(CommandDB[cmdIndex-1]);
-    printf("out array\n");
-    printCMD( CMD );
+    CMD->PC = GlobalPC; 
+    CommandDB[ GlobalPC++ ] = CMD;
+    printCMD( CommandDB[ GlobalPC - 1 ] ); /* TODO: debug */
 }
 
 uint64_t parse_cmd_to_uint64_t( Command cmd ) {
@@ -274,7 +268,7 @@ void print_imemin( char *imemin_file ) {
             break;
         }
         cmd = parse_cmd_to_uint64_t(*(CommandDB[i]));
-        sprintf(cmd_string, "%012lx", cmd);
+        sprintf(cmd_string, "%012I64x", cmd);
         fputs(cmd_string, file);
         fputs("\r\n", file);
     }
@@ -342,9 +336,7 @@ int main( int argc, char *argv[] ) {
 
     char line[ BUFFER_MAX_SIZE ];
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
-        printf("line: %s\n", line );
-        Command CMD = { 0 };
-        parseLine( &CMD, line );
+        parseLine( line );
     }    
     fclose( file );
 
@@ -370,16 +362,12 @@ int main( int argc, char *argv[] ) {
     // CommandDB[1]->Imm2 = "0x9";
     
     printf("print DBs status\n");
-
-    /* printCommandDB(); */
-    printf("chack 1\n");
+    printCommandDB();
     /* printLableDB(); */
-    printf("chack 2\n");
     /* printMemoryDB(); */
-    printf("chack 3\n");
+
     /* Replace Lables with the correct pc - Garibi */
     print_imemin(imemin_file);
     print_dmemin(dmemin_file);
-
     return 0;
 }
