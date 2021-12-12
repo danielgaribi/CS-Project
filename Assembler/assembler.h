@@ -14,7 +14,7 @@
 #define DB_NUM_COLS         2
 #define DB_MAX_NUM_LABLES   128
 #define BUFFER_MAX_SIZE     1024
-#define MAX_NUM_OF_COMMANDS 500
+#define MAX_NUM_OF_COMMANDS 4096
 #define OPCODE_INDEX        1
 #define RD_INDEX            2
 #define RS_INDEX            3
@@ -68,20 +68,20 @@ typedef struct {
     int RS;
     int RT;
     int RM;
-    char *Imm1;
-    char *Imm2;
-    char *Lable;
-    char *Note;
+    char Imm1[ BUFFER_MAX_SIZE ];
+    char Imm2[ BUFFER_MAX_SIZE ];
+    char Lable[ BUFFER_MAX_SIZE ];
+    char Note[ BUFFER_MAX_SIZE ];
 } Command;
 
 typedef struct {
-    char *Lable_name;
+    char Lable_name[ BUFFER_MAX_SIZE ];
     int PC;
 } Lable;
 
 typedef struct {
     int location;
-    char *value;
+    char value[ BUFFER_MAX_SIZE ];
 } Memory;
 
 char *opcodes[] = { 
@@ -129,12 +129,12 @@ char *registers[] = {
 };
 
 /* Debug functions */
-void printCMD( Command *CMD );
+void printCMD( Command CMD );
 
 /* Assembler Input/Output */
 void setCommand( Command *CMD, char **CMDArg );
 void parseLine( char *line );
-bool isLineValid( char *line );
+bool isLineEmptyOrNoteOnly( char *line );
 void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
 void setLable( Command *CMD, char *lableName );
