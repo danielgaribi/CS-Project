@@ -23,72 +23,72 @@ void simulator(char *trace_file) {
 bool call_action(Command *cmd, char *trace_file) {
     registers_values[1] = cmd->Imm1;
     registers_values[2] = cmd->Imm2;
-    add_to_trace_file(cmd, trace_file);
+    // add_to_trace_file(cmd, trace_file);
     switch (cmd->Opcode)
     {
         case op_add:
             add(cmd);
             break;
-        case op_sub:
-            sub(cmd);
-            break;
-        case op_mac:
-            mac(cmd);
-            break;
-        case op_and:
-            and(cmd);
-            break;
-        case op_or:
-            or(cmd);
-            break;
-        case op_xor:
-            xor(cmd);
-            break;
-        case op_sll:
-            sll(cmd);
-            break;
-        case op_sra:
-            sra(cmd);
-            break;
-        case op_srl:
-            srl(cmd);
-            break;
-        case op_beq:
-            beq(cmd);
-            break;
-        case op_bne:
-            bne(cmd);
-            break;
-        case op_blt:
-            blt(cmd);
-            break;
-        case op_bgt:
-            bgt(cmd);
-            break;
-        case op_ble:
-            ble(cmd);
-            break;
-        case op_bge:
-            bge(cmd);
-            break;
-        case op_jal:
-            jal(cmd);
-            break;
-        case op_lw:
-            lw(cmd);
-            break;
-        case op_sw:
-            sw(cmd);
-            break;
-        case op_reti:
-            reti(cmd);
-            break;
-        case op_in:
-            in(cmd);
-            break;
-        case op_out:
-            out(cmd);
-            break;
+        // case op_sub:
+        //     sub(cmd);
+        //     break;
+        // case op_mac:
+        //     mac(cmd);
+        //     break;
+        // case op_and:
+        //     and(cmd);
+        //     break;
+        // case op_or:
+        //     or(cmd);
+        //     break;
+        // case op_xor:
+        //     xor(cmd);
+        //     break;
+        // case op_sll:
+        //     sll(cmd);
+        //     break;
+        // case op_sra:
+        //     sra(cmd);
+        //     break;
+        // case op_srl:
+        //     srl(cmd);
+        //     break;
+        // case op_beq:
+        //     beq(cmd);
+        //     break;
+        // case op_bne:
+        //     bne(cmd);
+        //     break;
+        // case op_blt:
+        //     blt(cmd);
+        //     break;
+        // case op_bgt:
+        //     bgt(cmd);
+        //     break;
+        // case op_ble:
+        //     ble(cmd);
+        //     break;
+        // case op_bge:
+        //     bge(cmd);
+        //     break;
+        // case op_jal:
+        //     jal(cmd);
+        //     break;
+        // case op_lw:
+        //     lw(cmd);
+        //     break;
+        // case op_sw:
+        //     sw(cmd);
+        //     break;
+        // case op_reti:
+        //     reti(cmd);
+        //     break;
+        // case op_in:
+        //     in(cmd);
+        //     break;
+        // case op_out:
+        //     out(cmd);
+        //     break;
         case op_halt:
             return FALSE;
         
@@ -108,12 +108,15 @@ void add (Command *cmd) {
 void read_imemin_file(char *filename) {
     FILE *file;
     int local_pc;
-    char line[CMD_LENGTH_HEX];
+    char line[CMD_LENGTH_HEX + 1];
     file = fopen(filename, "r");
     assert(file != NULL);
 
     local_pc = 0;
-    while (fgets(line, CMD_LENGTH_HEX, file) != NULL) {
+    while (fgets(line, CMD_LENGTH_HEX + 1, file) != NULL) {
+        if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
+            continue;
+        }
         parse_cmd_line(line, local_pc);
         local_pc++;
     }
@@ -124,7 +127,7 @@ void read_imemin_file(char *filename) {
 void parse_cmd_line(char *line, int local_pc) {
     uint64_t bin_cmd = 0;
     Command *cmd;
-    bin_cmd = (uint64_t) strtol(imm, NULL, 16);
+    bin_cmd = (uint64_t) strtol(line, NULL, 16);
     cmd = (Command*) malloc(sizeof(Command));
 
     cmd->PC = local_pc;
@@ -138,6 +141,37 @@ void parse_cmd_line(char *line, int local_pc) {
     SET_OPCODE(bin_cmd, cmd);
 
     commands[local_pc] = cmd;
+}
+
+void read_dmemin_file(char *filename) {
+    FILE *file;
+    int loc = 0;
+    char line[MEM_LENGTH_HEX + 1];
+    file = fopen(filename, "r");
+    assert(file != NULL);
+
+    while (fgets(line, MEM_LENGTH_HEX + 1, file) != NULL) {
+        if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
+            continue;
+        }
+        memory[loc] = (uint32_t) strtol(line, NULL, 16);
+        loc++;
+    }
+
+    fclose( file );
+}
+
+bool isLineEmptyOrNoteOnly( char *line ) {
+    while ( line[ 0 ] != '\0' ) {
+        if ( line[ 0 ] == '\n' || line[ 0 ] == '#' ) {
+            return FALSE;
+        } else if ( line[ 0 ] == ' ' || line[ 0 ] == '\t' ) {
+            line++;
+        } else {
+            break;
+        }
+    }
+    return TRUE;
 }
 
 int main( int argc, char *argv[] ) {
@@ -175,8 +209,8 @@ int main( int argc, char *argv[] ) {
 
     read_imemin_file(imemin_file);
     read_dmemin_file(dmemin_file);
-    read_diskin_file(diskin_file);
-    read_irq2in_file(irq2in_file);
+    // read_diskin_file(diskin_file);
+    // read_irq2in_file(irq2in_file);
 
     simulator(trace_file);
 
