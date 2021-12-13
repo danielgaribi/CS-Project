@@ -13,6 +13,7 @@
 #define MEM_SIZE            4096
 #define NUM_OF_OPCODES      22
 #define NUM_OF_REGISTERS    16
+#define NUM_OF_IO_REGISTERS 22
 #define CMD_LENGTH_HEX      12
 #define MEM_LENGTH_HEX      8
 
@@ -52,7 +53,58 @@
  */
 
 /* Structs and Enums*/
-typedef char* Register;
+
+enum opcode {
+    op_add  = 0,
+    op_sub  = 1,
+    op_mac  = 2,
+    op_and  = 3,
+    op_or   = 4,
+    op_xor  = 5,
+    op_sll  = 6,
+    op_sra  = 7,
+    op_srl  = 8,
+    op_beq  = 9,
+    op_bne  = 10,
+    op_blt  = 11,
+    op_bgt  = 12,
+    op_ble  = 13,
+    op_bge  = 14,
+    op_jal  = 15,
+    op_lw   = 16,
+    op_sw   = 17,
+    op_reti = 18,
+    op_in   = 19,
+    op_out  = 20,
+    op_halt = 21,
+};
+
+enum io_regoster {
+    irq0enable      = 0,
+    irq1enable      = 1,
+    irq2enable      = 2,
+    irq0status      = 3,
+    irq1status      = 4,
+    irq2status      = 5,
+    irqhandler      = 6,
+    irqreturn       = 7,
+    clks            = 8,
+    leds            = 9,
+    display7seg     = 10,
+    timerenable     = 11,
+    timercurrent    = 12,
+    timermax        = 13,
+    diskcmd         = 14,
+    disksector      = 15,
+    diskbuffer      = 16,
+    diskstatus      = 17,
+    reserved1       = 18,
+    reserved2       = 19,
+    monitoraddr     = 20,
+    monitordata     = 21,
+    monitorcmd      = 22,
+};
+
 typedef struct {
     uint32_t PC;
     char *INST;
@@ -64,41 +116,6 @@ typedef struct {
     uint32_t Imm1;
     uint32_t Imm2;
 } Command;
-
-typedef struct {
-    char *Lable_name;
-    int PC;
-} Lable;
-
-typedef struct {
-    int location;
-    char *value;
-} Memory;
-
-char *opcodes[] = { 
-    "add",  /* 0 */
-    "sub",  /* 1 */
-    "mac",  /* 2 */
-    "and",  /* 3 */
-    "or",   /* 4 */
-    "xor",  /* 5 */
-    "sll",  /* 6 */
-    "sra",  /* 7 */
-    "srl",  /* 8 */
-    "beq",  /* 9 */
-    "bne",  /* 10 */
-    "blt",  /* 11 */
-    "bgt",  /* 12 */
-    "ble",  /* 13 */
-    "bge",  /* 14 */
-    "jal",  /* 15 */
-    "lw",   /* 16 */ 
-    "sw",   /* 17 */ 
-    "reti", /* 18 */
-    "in",   /* 19 */
-    "out",  /* 20 */ 
-    "halt"  /* 21 */
-};
 
 void read_imemin_file(char *filename);
 void read_dmemin_file(char *filename);

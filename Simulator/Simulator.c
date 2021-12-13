@@ -1,16 +1,17 @@
 #include "Simulator.h"
 
 uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
-uint32_t momory[MEM_SIZE] = { 0 };
+uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
+uint32_t memory[MEM_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 int pc;
 
 void simulator(char *trace_file) {
     pc = 0;
-    registers_values[0] = 0;
 
     while (TRUE)
     {
+        registers_values[0] = 0;
         if (call_action(commands[pc], trace_file) == FALSE) {
             break;
         }
@@ -23,72 +24,72 @@ bool call_action(Command *cmd, char *trace_file) {
     registers_values[1] = cmd->Imm1;
     registers_values[2] = cmd->Imm2;
     add_to_trace_file(cmd, trace_file);
-    switch (opcodes[cmd->Opcode])
+    switch (cmd->Opcode)
     {
-        case "add":
+        case op_add:
             add(cmd);
             break;
-        case "sub":
+        case op_sub:
             sub(cmd);
             break;
-        case "mac":
+        case op_mac:
             mac(cmd);
             break;
-        case "and":
+        case op_and:
             and(cmd);
             break;
-        case "or":
+        case op_or:
             or(cmd);
             break;
-        case "xor":
+        case op_xor:
             xor(cmd);
             break;
-        case "sll":
+        case op_sll:
             sll(cmd);
             break;
-        case "sra":
+        case op_sra:
             sra(cmd);
             break;
-        case "srl":
+        case op_srl:
             srl(cmd);
             break;
-        case "beq":
+        case op_beq:
             beq(cmd);
             break;
-        case "bne":
+        case op_bne:
             bne(cmd);
             break;
-        case "blt":
+        case op_blt:
             blt(cmd);
             break;
-        case "bgt":
+        case op_bgt:
             bgt(cmd);
             break;
-        case "ble":
+        case op_ble:
             ble(cmd);
             break;
-        case "bge":
+        case op_bge:
             bge(cmd);
             break;
-        case "jal":
+        case op_jal:
             jal(cmd);
             break;
-        case "lw":
+        case op_lw:
             lw(cmd);
             break;
-        case "sw":
+        case op_sw:
             sw(cmd);
             break;
-        case "reti":
+        case op_reti:
             reti(cmd);
             break;
-        case "in":
+        case op_in:
             in(cmd);
             break;
-        case "out":
+        case op_out:
             out(cmd);
             break;
-        case "halt":
+        case op_halt:
             return FALSE;
         
         default:
@@ -105,12 +106,15 @@ void add (Command *cmd) {
 }
 
 void read_imemin_file(char *filename) {
-    FILE *file = fopen(filename, "r");
+    FILE *file;
+    int local_pc;
+    char line[CMD_LENGTH_HEX];
+    file = fopen(filename, "r");
     assert(file != NULL);
 
     local_pc = 0;
-    while (fgets(line, BUFFER_MAX_SIZE, file) != NULL) {
-        parse_cmd_line(line);
+    while (fgets(line, CMD_LENGTH_HEX, file) != NULL) {
+        parse_cmd_line(line, local_pc);
         local_pc++;
     }
 
