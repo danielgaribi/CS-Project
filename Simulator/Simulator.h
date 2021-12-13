@@ -81,7 +81,7 @@ enum opcode {
     op_halt = 21,
 };
 
-enum io_regoster {
+enum io_register {
     irq0enable      = 0,
     irq1enable      = 1,
     irq2enable      = 2,
@@ -119,25 +119,43 @@ typedef struct {
     uint32_t Imm2;
 } Command;
 
-void read_imemin_file(char *filename);
-void read_dmemin_file(char *filename);
-void read_diskin_file(char *filename);
-void read_irq2in_file(char *filename);
+typedef struct {
+    FILE *imemin_fd;
+    FILE *dmemin_fd;
+    FILE *diskin_fd;
+    FILE *irq2in_fd;
+    FILE *dmemout_fd;
+    FILE *regout_fd;
+    FILE *trace_fd;
+    FILE *hwregtrace_fd;
+    FILE *cycles_fd;
+    FILE *led_fd;
+    FILE *display7reg_fd;
+    FILE *diskout_fd;
+    FILE *monitor_fd;
+    FILE *monitor_yuv_fd;
+} FD_Context;
 
-void write_dmemout_file(char *filename);
-void write_regout_file(char *filename);
-void write_cycles_file(char *filename);
-void write_leds_file(char *filename);
-void write_diskout_file(char *filename);
-void write_monitor_file(char *filename);
-void write_monitor_yuv_file(char *filename);
+void set_FD_context( char *argv[] );
+void read_imemin_file();
+void read_dmemin_file();
+void read_diskin_file();
+void read_irq2in_file();
 
-void add_to_trace_file(Command *cmd, char *trace_file); /** need to add args */
-void add_to_hwregtrace_file(char *filename); /** need to add args */
-void add_to_display7seg_file(char *filename); /** need to add args */
+void write_dmemout_file();
+void write_regout_file();
+void write_cycles_file();
+void write_leds_file();
+void write_diskout_file();
+void write_monitor_file();
+void write_monitor_yuv_file();
+
+void add_to_trace_file(Command *cmd); /** need to add args */
+void add_to_hwregtrace_file(); /** need to add args */
+void add_to_display7seg_file(); /** need to add args */
 
 void simulator();
-bool call_action(Command *cmd, char *trace_file);
+bool call_action(Command *cmd);
 void parse_cmd_line(char *line, int local_pc);
 bool isLineEmptyOrNoteOnly( char *line );
 
