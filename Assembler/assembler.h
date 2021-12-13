@@ -36,15 +36,15 @@
 #define SHIFT_RD             36
 #define SHIFT_OPCODE         40
 
-#define MASK_IMM2           (uint64_t)  0xfff   <<  SHIFT_IMM2 
-#define MASK_IMM1           (uint64_t)  0xfff   <<  SHIFT_IMM1
-#define MASK_RM             (uint64_t)  0xf     <<  SHIFT_RM
-#define MASK_RT             (uint64_t)  0xf     <<  SHIFT_RT
-#define MASK_RS             (uint64_t)  0xf     <<  SHIFT_RS
-#define MASK_RD             (uint64_t)  0xf     <<  SHIFT_RD
-#define MASK_OPCODE         (uint64_t)  0xff    <<  SHIFT_OPCODE
+#define MASK_IMM2           (uint64_t)  0xfff
+#define MASK_IMM1           (uint64_t)  0xfff
+#define MASK_RM             (uint64_t)  0xf
+#define MASK_RT             (uint64_t)  0xf
+#define MASK_RS             (uint64_t)  0xf
+#define MASK_RD             (uint64_t)  0xf
+#define MASK_OPCODE         (uint64_t)  0xff
 
-#define SET_CMD_COMP(_cmd, _comp, _mask, _shift)    (_cmd) = ((_cmd) & (~(_mask))) | ((uint64_t) (_comp) << (_shift))
+#define SET_CMD_COMP(_cmd, _comp, _mask, _shift)    (_cmd) = ((_cmd) & (~((_mask) << (_shift)))) | ((uint64_t) ((_comp) & (_mask))<< (_shift))
 
 #define SET_IMM1(_cmd, _imm1)                       SET_CMD_COMP((_cmd), (_imm1),   MASK_IMM1,  SHIFT_IMM1)
 #define SET_IMM2(_cmd, _imm2)                       SET_CMD_COMP((_cmd), (_imm2),   MASK_IMM2,  SHIFT_IMM2)
@@ -123,8 +123,8 @@ char *registers[] = {
     "$s0",    /* 10 */
     "$s1",    /* 11 */
     "$s2",    /* 12 */
-    "$sp",    /* 13 */
-    "$gp",    /* 14 */
+    "$gp",    /* 13 */
+    "$sp",    /* 14 */
     "$ra"     /* 15 */
 };
 
