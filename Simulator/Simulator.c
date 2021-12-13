@@ -6,16 +6,17 @@ uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
 uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
+FD_Context context = { 0 };
 int pc;
 
-void simulator(char *trace_file) {
+void simulator() {
     pc = 0;
     initInterrupts();
 
     while (TRUE)
     {
         registers_values[0] = 0;
-        if (call_action(commands[pc], trace_file) == FALSE) {
+        if (call_action(commands[pc]) == FALSE) {
             break;
         }
          //update clks
@@ -28,10 +29,10 @@ void simulator(char *trace_file) {
     
 }
 
-bool call_action(Command *cmd, char *trace_file) {
+bool call_action(Command *cmd) {
     registers_values[1] = cmd->Imm1;
     registers_values[2] = cmd->Imm2;
-    // add_to_trace_file(cmd, trace_file);
+    // add_to_trace_file(cmd, context.trace_fd);
     switch (cmd->Opcode)
     {
         case op_add:
@@ -113,15 +114,12 @@ void add (Command *cmd) {
     registers_values[cmd->RD] = rs_value + rt_value + rm_value;
 }
 
-void read_imemin_file(char *filename) {
-    FILE *file;
+void read_imemin_file() {
     int local_pc;
     char line[CMD_LENGTH_HEX + 1];
-    file = fopen(filename, "r");
-    assert(file != NULL);
 
     local_pc = 0;
-    while (fgets(line, CMD_LENGTH_HEX + 1, file) != NULL) {
+    while (fgets(line, CMD_LENGTH_HEX + 1, context.imemin_fd) != NULL) {
         if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
             continue;
         }
@@ -129,7 +127,7 @@ void read_imemin_file(char *filename) {
         local_pc++;
     }
 
-    fclose( file );
+    fclose( context.imemin_fd );
 }
 
 void parse_cmd_line(char *line, int local_pc) {
@@ -151,14 +149,11 @@ void parse_cmd_line(char *line, int local_pc) {
     commands[local_pc] = cmd;
 }
 
-void read_dmemin_file(char *filename) {
-    FILE *file;
+void read_dmemin_file() {
     int loc = 0;
     char line[MEM_LENGTH_HEX + 1];
-    file = fopen(filename, "r");
-    assert(file != NULL);
 
-    while (fgets(line, MEM_LENGTH_HEX + 1, file) != NULL) {
+    while (fgets(line, MEM_LENGTH_HEX + 1, context.dmemin_fd) != NULL) {
         if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
             continue;
         }
@@ -166,7 +161,7 @@ void read_dmemin_file(char *filename) {
         loc++;
     }
 
-    fclose( file );
+    fclose( context.dmemin_fd );
 }
 
 bool isLineEmptyOrNoteOnly( char *line ) {
@@ -182,45 +177,35 @@ bool isLineEmptyOrNoteOnly( char *line ) {
     return TRUE;
 }
 
+void set_FD_context( char *argv[] ) {
+    context.imemin_fd        = fopen( argv[ 1 ], "a+" );   assert( context.imemin_fd != NULL);
+    context.dmemin_fd        = fopen( argv[ 2 ], "a+" );   assert( context.dmemin_fd != NULL);
+    context.diskin_fd        = fopen( argv[ 3 ], "a+" );   assert( context.diskin_fd != NULL);
+    context.irq2in_fd        = fopen( argv[ 4 ], "a+" );   assert( context.irq2in_fd != NULL);
+    context.dmemout_fd       = fopen( argv[ 5 ], "a+" );   assert( context.dmemout_fd != NULL);
+    context.regout_fd        = fopen( argv[ 6 ], "a+" );   assert( context.regout_fd != NULL);
+    context.trace_fd         = fopen( argv[ 7 ], "a+" );   assert( context.trace_fd != NULL);
+    context.hwregtrace_fd    = fopen( argv[ 8 ], "a+" );   assert( context.hwregtrace_fd != NULL);
+    context.cycles_fd        = fopen( argv[ 9 ], "a+" );   assert( context.cycles_fd != NULL);
+    context.led_fd           = fopen( argv[ 10 ], "a+" );  assert( context.led_fd != NULL);
+    context.display7reg_fd   = fopen( argv[ 11 ], "a+" );  assert( context.display7reg_fd != NULL);
+    context.diskout_fd       = fopen( argv[ 12 ], "a+" );  assert( context.diskout_fd != NULL);
+    context.monitor_fd       = fopen( argv[ 13 ], "a+" );  assert( context.monitor_fd != NULL);
+    context.monitor_yuv_fd   = fopen( argv[ 14 ], "a+" );  assert( context.monitor_yuv_fd != NULL);
+}
+
 int main( int argc, char *argv[] ) {
-    char *imemin_file,
-         *dmemin_file,
-         *diskin_file,
-         *irq2in_file,
-         *dmemout_file,
-         *regout_file,
-         *trace_file,
-         *hwregtrace_file,
-         *cycles_file,
-         *led_file,
-         *display7reg_file,
-         *diskout_file,
-         *monitor_file,
-         *monitor_yuv_file;
-
     assert( argc == 15 );
+    set_FD_context( argv );
 
-    imemin_file         = argv[1];
-    dmemin_file         = argv[2];
-    diskin_file         = argv[3];
-    irq2in_file         = argv[4];
-    dmemout_file        = argv[5];
-    regout_file         = argv[6];
-    trace_file          = argv[7];
-    hwregtrace_file     = argv[8];
-    cycles_file         = argv[9];
-    led_file            = argv[10];
-    display7reg_file    = argv[11];
-    diskout_file        = argv[12];
-    monitor_file        = argv[13];
-    monitor_yuv_file    = argv[14];
 
-    read_imemin_file(imemin_file);
-    read_dmemin_file(dmemin_file);
+    /* get fd for files from sturct FD_context */
+    read_imemin_file();
+    read_dmemin_file();
     // read_diskin_file(diskin_file);
     // read_irq2in_file(irq2in_file);
 
-    simulator(trace_file);
+    simulator();
 
     return 0;
 }
