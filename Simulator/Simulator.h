@@ -79,7 +79,7 @@ enum opcode {
     op_halt = 21,
 };
 
-enum io_regoster {
+enum io_register {
     irq0enable      = 0,
     irq1enable      = 1,
     irq2enable      = 2,
