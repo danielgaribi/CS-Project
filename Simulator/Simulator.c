@@ -1,4 +1,6 @@
 #include "Simulator.h"
+#include "interrupt.h"
+
 
 uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
 uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
@@ -8,6 +10,7 @@ int pc;
 
 void simulator(char *trace_file) {
     pc = 0;
+    initInterrupts();
 
     while (TRUE)
     {
@@ -16,6 +19,10 @@ void simulator(char *trace_file) {
             break;
         }
         pc++;
+        //update clks
+        updateInterrupts();
+        interruptHandler();
+
     }
     
 }
