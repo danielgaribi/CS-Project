@@ -18,11 +18,12 @@ void simulator(char *trace_file) {
         if (call_action(commands[pc], trace_file) == FALSE) {
             break;
         }
-        pc++;
-        //update clks
+         //update clks
         updateInterrupts();
         interruptHandler();
 
+        pc++;
+       
     }
     
 }

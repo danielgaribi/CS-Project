@@ -44,7 +44,7 @@ int interruptHandler() // need to be called at the end of every "main loop" iter
         {
             return;
         }
-        isInterrupt = pc;
+        registers_values[irqreturn] = pc;
         pc = registers_values[irqhandler];
         isInterrupt = 1;
     }
