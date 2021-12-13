@@ -46,6 +46,8 @@
 #define READ_REGISTERS_VALUE(_cmd, _rs_value, _rt_value, _rm_value)     _rs_value = registers_values[(_cmd)->RS];\
                                                                         _rt_value = registers_values[(_cmd)->RT];\
                                                                         _rm_value = registers_values[(_cmd)->RM];
+#define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          _rs_value = registers_values[(_cmd)->RS];\
+                                                                        _rt_value = registers_values[(_cmd)->RT];
 
 /*  
  * TODO: 

@@ -29,66 +29,66 @@ bool call_action(Command *cmd, char *trace_file) {
         case op_add:
             add(cmd);
             break;
-        // case op_sub:
-        //     sub(cmd);
-        //     break;
-        // case op_mac:
-        //     mac(cmd);
-        //     break;
-        // case op_and:
-        //     and(cmd);
-        //     break;
-        // case op_or:
-        //     or(cmd);
-        //     break;
-        // case op_xor:
-        //     xor(cmd);
-        //     break;
-        // case op_sll:
-        //     sll(cmd);
-        //     break;
-        // case op_sra:
-        //     sra(cmd);
-        //     break;
-        // case op_srl:
-        //     srl(cmd);
-        //     break;
-        // case op_beq:
-        //     beq(cmd);
-        //     break;
-        // case op_bne:
-        //     bne(cmd);
-        //     break;
-        // case op_blt:
-        //     blt(cmd);
-        //     break;
-        // case op_bgt:
-        //     bgt(cmd);
-        //     break;
-        // case op_ble:
-        //     ble(cmd);
-        //     break;
-        // case op_bge:
-        //     bge(cmd);
-        //     break;
-        // case op_jal:
-        //     jal(cmd);
-        //     break;
-        // case op_lw:
-        //     lw(cmd);
-        //     break;
-        // case op_sw:
-        //     sw(cmd);
-        //     break;
-        // case op_reti:
-        //     reti(cmd);
-        //     break;
-        // case op_in:
-        //     in(cmd);
-        //     break;
-        // case op_out:
-        //     out(cmd);
-        //     break;
+        case op_sub:
+            sub(cmd);
+            break;
+        case op_mac:
+            mac(cmd);
+            break;
+        case op_and:
+            and(cmd);
+            break;
+        case op_or:
+            or(cmd);
+            break;
+        case op_xor:
+            xor(cmd);
+            break;
+        case op_sll:
+            sll(cmd);
+            break;
+        case op_sra:
+            sra(cmd);
+            break;
+        case op_srl:
+            srl(cmd);
+            break;
+        case op_beq:
+            beq(cmd);
+            break;
+        case op_bne:
+            bne(cmd);
+            break;
+        case op_blt:
+            blt(cmd);
+            break;
+        case op_bgt:
+            bgt(cmd);
+            break;
+        case op_ble:
+            ble(cmd);
+            break;
+        case op_bge:
+            bge(cmd);
+            break;
+        case op_jal:
+            jal(cmd);
+            break;
+        case op_lw:
+            lw(cmd);
+            break;
+        case op_sw:
+            sw(cmd);
+            break;
+        case op_reti:
+            reti(cmd);
+            break;
+        case op_in:
+            in(cmd);
+            break;
+        case op_out:
+            out(cmd);
+            break;
         case op_halt:
             return FALSE;
         
@@ -99,10 +99,152 @@ bool call_action(Command *cmd, char *trace_file) {
     return TRUE;
 }
 
-void add (Command *cmd) {
-    int rs_value, rt_value, rm_value;
+void add(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     registers_values[cmd->RD] = rs_value + rt_value + rm_value;
+}
+
+void sub(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = rs_value - rt_value - rm_value;
+}
+
+void mac(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = rs_value * rt_value + rm_value;
+}
+
+void and(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = rs_value & rt_value & rm_value;
+}
+
+void or(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = rs_value | rt_value | rm_value;
+}
+
+void xor(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = rs_value ^ rt_value ^ rm_value;
+}
+
+void sll(Command *cmd) {
+    uint32_t rs_value, rt_value;
+    READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    registers_values[cmd->RD] = rs_value << rt_value;
+}
+
+void sra(Command *cmd) {
+    uint32_t rs_value, rt_value;
+    READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    /**
+     * R[rd] = R[rs] >>(logical) R[rt], then the msb is 0.
+     * do R[rs] and 1 << 31 to get R[rs] msb with 31 0 to the right.
+     * Or between them both will reter arithmetic shift
+     */
+    registers_values[cmd->RD] = (rs_value >> rt_value) | (rs_value & (1 << 31)); 
+}
+
+void srl(Command *cmd) {
+    uint32_t rs_value, rt_value;
+    READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    registers_values[cmd->RD] = rs_value >> rt_value;
+}
+
+void beq(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value == rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void bne(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value != rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void blt(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value < rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void bgt(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value > rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void ble(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value <= rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void bge(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    if (rs_value >= rt_value) {
+        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    }
+}
+
+void jal(Command *cmd) {
+    uint32_t lower_12_bit_mask = 0xfff;
+    uint32_t rm_value = registers_values[cmd->RM];
+    registers_values[cmd->RD] = pc + 1;
+    pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+}
+
+void lw(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    registers_values[cmd->RD] = memory[rs_value + rt_value] + rm_value;
+}
+
+void sw(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    memory[rs_value + rt_value] = rm_value + registers_values[cmd->RD];
+}
+
+void reti(Command *cmd) {
+    pc = io_registers_values[irqreturn] - 1; /** pc will increment in main loop by one */
+}
+
+void in(Command *cmd) {
+    uint32_t rs_value, rt_value;
+    READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+}
+
+void out(Command *cmd) {
+    uint32_t rs_value, rt_value, rm_value;
+    READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    io_registers_values[rs_value + rt_value] = rm_value;
 }
 
 void read_imemin_file(char *filename) {
