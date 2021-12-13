@@ -258,15 +258,12 @@ void print_imemin( char *imemin_file ) {
     int i;
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX+1];
-    FILE *file = fopen(imemin_file, "w+");
-    /* assert(file != NULL); */
+    FILE *file = fopen(imemin_file, "w");
+    assert(file != NULL);
 
-    for (i = 0; i < MAX_NUM_OF_COMMANDS; i++) {
-        if (CommandDB[i].Imm1 == NULL) {
-            break;
-        }
+    for (i = 0; i < GlobalPC; i++) {
         cmd = parse_cmd_to_uint64_t(CommandDB[i]);
-        sprintf(cmd_string, "%012I64x", cmd);
+        sprintf(cmd_string, "%012lX", cmd);
         fputs(cmd_string, file);
         fputs("\r\n", file);
     }
