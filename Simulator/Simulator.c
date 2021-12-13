@@ -7,6 +7,7 @@ uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
+bool isLedChanged = FALSE;
 int pc;
 
 void simulator() {
@@ -185,6 +186,9 @@ void out(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     io_registers_values[rs_value + rt_value] = rm_value;
+    if ( rs_value + rt_value == leds ) {
+        isLedChanged = TRUE;
+    }
 }
 
 void read_imemin_file() {
