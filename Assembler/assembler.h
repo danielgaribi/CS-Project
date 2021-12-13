@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+
 #define _POSIX_C_SOURCE 200809L
 
 /* Defines and Macros*/
@@ -12,7 +14,7 @@
 #define DB_NUM_COLS         2
 #define DB_MAX_NUM_LABLES   128
 #define BUFFER_MAX_SIZE     1024
-#define MAX_NUM_OF_COMMANDS 500
+#define MAX_NUM_OF_COMMANDS 4096
 #define OPCODE_INDEX        1
 #define RD_INDEX            2
 #define RS_INDEX            3
@@ -23,14 +25,39 @@
 #define NUM_OF_CMD_FIELDS   7
 #define NUM_OF_OPCODES      22
 #define NUM_OF_REGISTERS    16
+#define CMD_LENGTH_HEX      12
+#define MEM_LENGTH_HEX      8
 
-#define MASK_IMM1           0xfff
-#define MASK_IMM2           0xfff   >>  12 
-#define MASK_RM             0xf     >>  24
-#define MASK_RT             0xf     >>  28
-#define MASK_RS             0xf     >>  32
-#define MASK_RD             0xf     >>  36
-#define MASK_OPCODE         0xff    >>  40
+#define SHIFT_IMM2           0
+#define SHIFT_IMM1           12
+#define SHIFT_RM             24
+#define SHIFT_RT             28
+#define SHIFT_RS             32
+#define SHIFT_RD             36
+#define SHIFT_OPCODE         40
+
+#define MASK_IMM2           (uint64_t)  0xfff
+#define MASK_IMM1           (uint64_t)  0xfff
+#define MASK_RM             (uint64_t)  0xf
+#define MASK_RT             (uint64_t)  0xf
+#define MASK_RS             (uint64_t)  0xf
+#define MASK_RD             (uint64_t)  0xf
+#define MASK_OPCODE         (uint64_t)  0xff
+
+#define SET_CMD_COMP(_cmd, _comp, _mask, _shift)    (_cmd) = ((_cmd) & (~((_mask) << (_shift)))) | ((uint64_t) ((_comp) & (_mask))<< (_shift))
+
+#define SET_IMM1(_cmd, _imm1)                       SET_CMD_COMP((_cmd), (_imm1),   MASK_IMM1,  SHIFT_IMM1)
+#define SET_IMM2(_cmd, _imm2)                       SET_CMD_COMP((_cmd), (_imm2),   MASK_IMM2,  SHIFT_IMM2)
+#define SET_RM(_cmd, _rm)                           SET_CMD_COMP((_cmd), (_rm),     MASK_RM,  SHIFT_RM)
+#define SET_RT(_cmd, _rt)                           SET_CMD_COMP((_cmd), (_rt),     MASK_RT,  SHIFT_RT)
+#define SET_RS(_cmd, _rs)                           SET_CMD_COMP((_cmd), (_rs),     MASK_RS,  SHIFT_RS)
+#define SET_RD(_cmd, _rd)                           SET_CMD_COMP((_cmd), (_rd),     MASK_RD,  SHIFT_RD)
+#define SET_OPCODE(_cmd, _opcode)                   SET_CMD_COMP((_cmd), (_opcode), MASK_OPCODE,  SHIFT_OPCODE)
+
+/*  
+ * TODO: 
+ * parse command into parts and enter command struct
+ */
 
 /* Structs and Enums*/
 typedef char* Register;
@@ -41,20 +68,20 @@ typedef struct {
     int RS;
     int RT;
     int RM;
-    char *Imm1;
-    char *Imm2;
-    char *Lable;
-    char *Note;
+    char Imm1[ BUFFER_MAX_SIZE ];
+    char Imm2[ BUFFER_MAX_SIZE ];
+    char Lable[ BUFFER_MAX_SIZE ];
+    char Note[ BUFFER_MAX_SIZE ];
 } Command;
 
 typedef struct {
-    char *Lable_name;
+    char Lable_name[ BUFFER_MAX_SIZE ];
     int PC;
 } Lable;
 
 typedef struct {
-    char *location;
-    char *value;
+    int location;
+    char value[ BUFFER_MAX_SIZE ];
 } Memory;
 
 char *opcodes[] = { 
@@ -96,22 +123,25 @@ char *registers[] = {
     "$s0",    /* 10 */
     "$s1",    /* 11 */
     "$s2",    /* 12 */
-    "$sp",    /* 13 */
-    "$gp",    /* 14 */
+    "$gp",    /* 13 */
+    "$sp",    /* 14 */
     "$ra"     /* 15 */
 };
 
 /* Debug functions */
-void printCMD( Command *CMD );
+void printCMD( Command CMD );
 
 /* Assembler Input/Output */
 void setCommand( Command *CMD, char **CMDArg );
-void parseLine( Command *CMD, char *line );
-bool isLineValid( char *line );
+void parseLine( char *line );
+bool isLineEmptyOrNoteOnly( char *line );
+void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
 void setLable( Command *CMD, char *lableName );
 void setMemory( char *line );
-void print_imemin( void );
-void print_dmemin( void );
-int setBinaryCommand( Command cmd );
+void print_imemin( char *imemin_file );
+void print_dmemin( char *dmemin_file );
+uint64_t parse_cmd_to_uint64_t( Command cmd );
+int convert_imm_to_int(char *imm);
 bool isLableFound( char *command );
+void get_memory_array(int **memory, int *size);

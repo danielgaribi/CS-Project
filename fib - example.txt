@@ -1,3 +1,16 @@
+# Test empty lines
+
+ 
+
+	 
+	
+ # 
+	# 
+	 #
+	 #
+	 	  	  	   	   	  # 
+
+
 	out $zero, $zero, $imm2, $imm1, 1, 2		# enable irq2
 	sll $sp, $imm1, $imm2, $zero, 1, 11		# set $sp = 1 << 11 = 2048
 	out $zero, $imm1, $zero, $imm2, 6, L3		# set irqhandler as L3
@@ -5,7 +18,8 @@
 	jal $ra, $zero, $zero, $imm2, 0, fib		# calc $v0 = fib(x)
 	sw $zero, $zero, $imm2, $v0, 0, 65		# store fib(x) in 65
 	halt $zero, $zero, $zero, $zero, 0, 0		# halt
-fib: add $sp, $sp, $imm2, $zero, 0, -3		# adjust stack for 3 items
+fib: 
+	add $sp, $sp, $imm2, $zero, 0, -3		# adjust stack for 3 items
 	sw $zero, $sp, $imm2, $s0, 0, 2			# save $s0
 	sw $zero, $sp, $imm2, $ra, 0, 1			# save return address
 	sw $zero, $sp, $imm2, $a0, 0, 0			# save argument
@@ -23,6 +37,11 @@ L1:	sub $a0, $a0, $imm2, $zero, 0, 1		# calculate x - 1
 	lw $ra, $sp, $imm2, $zero, 0, 1			# restore $ra
 	lw $s0, $sp, $imm2, $zero, 0, 2			# restore $s0
 L2:
+
+ # test empty line after lable 
+
+
+
 	add $sp, $sp, $imm2, $zero, 0, 3		# pop 3 items from stack
 	add $t0, $a0, $zero, $zero, 0, 0		# $t0 = $a0
 	sll $t0, $t0, $imm2, $zero, 0, 16		# $t0 = $t0 << 16
