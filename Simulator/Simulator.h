@@ -35,7 +35,7 @@
 
 #define SET_CMD_VAL(_bin_cmd, _dest, _mask, _shift)    (_dest) = ((uint64_t) ((_bin_cmd) & (_mask))) >> (_shift)
 
-#define SET_IMM1(_bin_cmd, _cmd)                       SET_CMD_VAL((_bin_cmd), (_cmd)->IMM1,   MASK_IMM1,   SHIFT_IMM1)
+#define SET_IMM1(_bin_cmd, _cmd)                       SET_CMD_VAL((_bin_cmd), (_cmd)->Imm1,   MASK_IMM1,   SHIFT_IMM1)
 #define SET_IMM2(_bin_cmd, _cmd)                       SET_CMD_VAL((_bin_cmd), (_cmd)->Imm2,   MASK_IMM2,   SHIFT_IMM2)
 #define SET_RM(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RM,     MASK_RM,     SHIFT_RM)
 #define SET_RT(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RT,     MASK_RT,     SHIFT_RT)
@@ -107,7 +107,7 @@ enum io_regoster {
 
 typedef struct {
     uint32_t PC;
-    char *INST;
+    char INST[CMD_LENGTH_HEX + 1];
     uint32_t Opcode;
     uint32_t RD;
     uint32_t RS;
@@ -135,15 +135,19 @@ void add_to_hwregtrace_file(char *filename); /** need to add args */
 void add_to_display7seg_file(char *filename); /** need to add args */
 
 void simulator();
-bool call_action(Command *cmd);
+bool call_action(Command *cmd, char *trace_file);
+void parse_cmd_line(char *line, int local_pc);
+bool isLineEmptyOrNoteOnly( char *line );
 
 void add (Command *cmd);
 void sub (Command *cmd);
 void mac (Command *cmd);
 void and (Command *cmd);
 void or  (Command *cmd);
+void xor (Command *cmd);
 void sll (Command *cmd);
 void sra (Command *cmd);
+void srl (Command *cmd);
 void beq (Command *cmd);
 void bne (Command *cmd);
 void blt (Command *cmd);
