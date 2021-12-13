@@ -258,7 +258,7 @@ void print_imemin( char *imemin_file ) {
     int i;
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX+1];
-    FILE *file = fopen(imemin_file, "w");
+    FILE *file = fopen(imemin_file, "w+");
     assert(file != NULL);
 
     for (i = 0; i < GlobalPC; i++) {
@@ -306,7 +306,7 @@ void print_dmemin( char *dmemin_file ) {
 
     get_memory_array(&memory, &size);
     file = fopen(dmemin_file, "w+");
-    /* assert(file != NULL); */
+    assert(file != NULL);
 
     for (i = 0; i < size; i++) {
         sprintf(mem_value_string, "%08x", memory[i]);
@@ -334,38 +334,16 @@ int main( int argc, char *argv[] ) {
         parseLine( line );
     }    
     fclose( file );
-
-    /* test data for im print */
-    // CommandDB[0] = (Command*) malloc(sizeof(Command));
-    // CommandDB[0]->PC = 0;
-    // CommandDB[0]->Opcode = 13;
-    // CommandDB[0]->RD = 4;
-    // CommandDB[0]->RS = 3;
-    // CommandDB[0]->RT = 2;
-    // CommandDB[0]->RM = 1;
-    // CommandDB[0]->Imm1 = "5";
-    // CommandDB[0]->Imm2 = "10";
-
-    // CommandDB[1] = (Command*) malloc(sizeof(Command));
-    // CommandDB[1]->PC = 1;
-    // CommandDB[1]->Opcode = 12;
-    // CommandDB[1]->RD = 5;
-    // CommandDB[1]->RS = 6;
-    // CommandDB[1]->RT = 7;
-    // CommandDB[1]->RM = 8;
-    // CommandDB[1]->Imm1 = "0xff";
-    // CommandDB[1]->Imm2 = "0x9";
     
-    printf("print Command DB status:\n"); /* TODO: debug */
-    printCommandDB();
+    // printf("print Command DB status:\n"); /* TODO: debug */
+    // printCommandDB();
     
-    printf("\nprint Lable DB status:\n"); /* TODO: debug */
-    printLableDB();
+    // printf("\nprint Lable DB status:\n"); /* TODO: debug */
+    // printLableDB();
     
-    printf("\nprint Memory DB status:\n"); /* TODO: debug */
-    printMemoryDB();
+    // printf("\nprint Memory DB status:\n"); /* TODO: debug */
+    // printMemoryDB();
 
-    /* Replace Lables with the correct pc - Garibi */
     print_imemin(imemin_file);
     print_dmemin(dmemin_file);
     return 0;
