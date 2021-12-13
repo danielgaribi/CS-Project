@@ -32,6 +32,7 @@
 #define MASK_RS             (uint64_t)  0xf     <<  SHIFT_RS
 #define MASK_RD             (uint64_t)  0xf     <<  SHIFT_RD
 #define MASK_OPCODE         (uint64_t)  0xff    <<  SHIFT_OPCODE
+#define MASK_12_LOWER_BITS  0xfff
 
 #define SET_CMD_VAL(_bin_cmd, _dest, _mask, _shift)    (_dest) = ((uint64_t) ((_bin_cmd) & (_mask))) >> (_shift)
 
