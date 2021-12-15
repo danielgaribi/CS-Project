@@ -1,5 +1,6 @@
 #include "Simulator.h"
 #include "interrupt.h"
+#include "disk.h"
 
 
 uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
@@ -19,7 +20,8 @@ void simulator() {
         if (call_action(commands[pc]) == FALSE) {
             break;
         }
-         //update clks
+        diskHandler();
+        //update clks
         updateInterrupts();
         interruptHandler();
 
