@@ -15,7 +15,7 @@
 for1:	
         add $a0, $a0, $imm2, $zero, 0, 1                    # a0++
         beq $zero, $a0, $imm1, $imm2, 1, for2               # if a0 == 1 jump to for2 : first iteration
-        bgt $zero, $a2, $imm1, $imm2 4, return              # if a0 > 4 jump to return
+        bgt $zero, $a2, $imm1, $imm2, 4, return             # if a0 > 4 jump to return
         add $a1, $zero, $zero, $zero, 0, 0                  # a1 = 0 
         add $s0, $s0, $imm2, $zero, 0, 4                    # s0 = A[s0 + 4] : next row
         add $s1, $imm2, $zero, $zero, 0, 0x110              # s1 = B[0] 
