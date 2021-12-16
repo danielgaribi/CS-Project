@@ -12,7 +12,7 @@ void initDisk(){
     {
        int sector = lineIndex / SECTOR_NUMBER;
        int sectorIndex = lineIndex % SECTOR_SIZE;
-       diskMemory[sector][sectorIndex] = hexToDec(line);//replace with tlustys function
+       diskMemory[sector][sectorIndex] = (int) strtol(line, NULL, 16);
        lineIndex++;
     }
 }
@@ -46,15 +46,14 @@ int diskHandler(){
             registers_values[diskstatus] = 0;
             registers_values[irq1status] = 1;
         }
+        if(registers_values[diskcmd] == 1){
+            readFromDisk();
+        }
+        if(registers_values[diskcmd] == 2){
+            writeToDisk();
+        }
+        diskTimer = 0;
     }
-    if(registers_values[diskcmd] == 1){
-        readFromDisk();
-    }
-    if(registers_values[diskcmd] == 2){
-        writeToDisk();
-    }
-    diskTimer = 0;
-
 
 
 }

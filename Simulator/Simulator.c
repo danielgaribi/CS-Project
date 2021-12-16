@@ -13,6 +13,7 @@ int pc;
 void simulator() {
     pc = 0;
     initInterrupts();
+    initDisk();
 
     while (TRUE)
     {
