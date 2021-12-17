@@ -8,6 +8,7 @@ uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
+bool isLedChanged = FALSE;
 int pc;
 
 void simulator() {
@@ -102,64 +103,57 @@ void srl(Command *cmd) {
 }
 
 void beq(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value == rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void bne(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value != rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void blt(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value < rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void bgt(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value > rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void ble(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value <= rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void bge(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value >= rt_value) {
-        pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+        pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
     }
 }
 
 void jal(Command *cmd) {
-    uint32_t lower_12_bit_mask = 0xfff;
     uint32_t rm_value = registers_values[cmd->RM];
     registers_values[cmd->RD] = pc + 1;
-    pc = (rm_value & lower_12_bit_mask) - 1; /** pc will increment in main loop by one */
+    pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
 }
 
 void lw(Command *cmd) {
@@ -188,6 +182,9 @@ void out(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     io_registers_values[rs_value + rt_value] = rm_value;
+    if ( rs_value + rt_value == leds ) {
+        isLedChanged = TRUE;
+    }
 }
 
 void read_imemin_file() {
