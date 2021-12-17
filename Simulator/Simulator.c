@@ -8,7 +8,6 @@ uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
-bool isLedChanged = FALSE;
 int pc;
 
 void simulator() {
@@ -18,7 +17,7 @@ void simulator() {
 
     while (TRUE)
     {
-        registers_values[0] = 0;
+        registers_values[0] = 0; /* set $zero to 0 */
         if (call_action(commands[pc]) == FALSE) {
             break;
         }
@@ -42,7 +41,9 @@ bool call_action(Command *cmd) {
         case op_add:
             add(cmd);
             break;
-
+        /* Add more cases ?? */
+    }
+}
 void add(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
@@ -181,10 +182,23 @@ void in(Command *cmd) {
 void out(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    io_registers_values[rs_value + rt_value] = rm_value;
-    if ( rs_value + rt_value == leds ) {
-        isLedChanged = TRUE;
+    
+    /* If command changes leds status, append to ledsFile next cycle */
+    if ( ( rs_value + rt_value == leds ) && ( io_registers_values [ leds ] != rm_value ) ) {
+        addToledsTraceFile();
     }
+
+    io_registers_values[rs_value + rt_value] = rm_value;
+}
+
+void addToledsTraceFile() {
+    uint32_t time = registers_values[ timercurrent ]; 
+    uint32_t leds_status = io_registers_values[ leds ];
+    char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */ 
+    sprintf(leds_status_str, "%d ", time);
+    sprintf(leds_status_str, "%012lX", leds_status);
+    fputs(leds_status_str, context.led_fd);
+    fputs("\r\n", context.led_fd);
 }
 
 void read_imemin_file() {
@@ -267,6 +281,23 @@ void set_FD_context( char *argv[] ) {
     context.monitor_yuv_fd   = fopen( argv[ 14 ], "a+" );  assert( context.monitor_yuv_fd != NULL);
 }
 
+void close_FD_context() {
+    fclose(context.imemin_fd);
+    fclose(context.dmemin_fd);
+    fclose(context.diskin_fd);
+    fclose(context.irq2in_fd);
+    fclose(context.dmemout_fd);
+    fclose(context.regout_fd);
+    fclose(context.trace_fd);
+    fclose(context.hwregtrace_fd);
+    fclose(context.cycles_fd);
+    fclose(context.led_fd);
+    fclose(context.display7reg_fd);
+    fclose(context.diskout_fd);
+    fclose(context.monitor_fd);
+    fclose(context.monitor_yuv_fd);
+}
+
 int main( int argc, char *argv[] ) {
     assert( argc == 15 );
     set_FD_context( argv );
@@ -279,6 +310,7 @@ int main( int argc, char *argv[] ) {
     // read_irq2in_file(irq2in_file);
 
     simulator();
+    close_FD_context();
 
     return 0;
 }
