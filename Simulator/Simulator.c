@@ -6,6 +6,7 @@
 uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
 uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
+uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
 int pc;
@@ -183,9 +184,13 @@ void out(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     
-    /* If command changes leds status, append to ledsFile next cycle */
+    /* If command changes leds status, append to ledsFile */
     if ( ( rs_value + rt_value == leds ) && ( io_registers_values [ leds ] != rm_value ) ) {
         addToledsTraceFile();
+    }
+    /* If command set monitorcmd to 1, change monitor status */
+    else if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
+        changeMonitor();
     }
 
     io_registers_values[rs_value + rt_value] = rm_value;
@@ -196,10 +201,51 @@ void addToledsTraceFile() {
     uint32_t leds_status = io_registers_values[ leds ];
     char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */ 
     sprintf(leds_status_str, "%d ", time);
-    sprintf(leds_status_str, "%012lX", leds_status);
+    sprintf(leds_status_str, "%08X", leds_status);
     fputs(leds_status_str, context.led_fd);
     fputs("\r\n", context.led_fd);
 }
+
+void changeMonitor() {
+    int row, col;
+    uint32_t addr = io_registers_values[monitoraddr];
+    
+    col = addr & MASK_8_LOWER_BITS;
+    row = (addr >> 8) & MASK_8_LOWER_BITS;
+
+    /* Validate */
+    if ((row < 0) || (row > MONITOR_SIZE) || (col < 0) || (col > MONITOR_SIZE) || ( addr >> 16 != 0 )) {
+        printf("monitor addr is invalid!\n");
+        exit(EXIT_FAILURE); /* TODO: check how to exit on failure */
+    }
+    else if (io_registers_values[monitordata] > 255) {
+        printf("monitor data is invalid\n");
+        exit(EXIT_FAILURE); /* TODO: check how to exit on failure */
+    }
+    monitor[row][col] = io_registers_values[monitordata];
+}
+
+void print_pixel_monitor_file(int row, int col) {
+    char pixel_status_str[PIXEL_BUFFER_SIZE];
+    sprintf(pixel_status_str, "%02X", monitor[row][col]);
+    fputs(pixel_status_str, context.led_fd);
+    fputs("\r\n", context.monitor_fd);
+}
+
+void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
+    fwrite(&monitor[row][col], sizeof(uint8_t), 1, context.monitor_yuv_fd );
+    fputs("\r\n", context.monitor_yuv_fd);
+}
+
+void write_monitor_file() {
+    for (int row = 0; row < MONITOR_SIZE; row++) {
+        for (int col = 0; col < MONITOR_SIZE; col++) {
+            print_pixel_monitor_file(row, col);
+            print_pixel_monitor_yuv_file(row, col);
+        }
+    }
+}
+
 
 void read_imemin_file() {
     int local_pc;
@@ -278,7 +324,7 @@ void set_FD_context( char *argv[] ) {
     context.display7reg_fd   = fopen( argv[ 11 ], "a+" );  assert( context.display7reg_fd != NULL);
     context.diskout_fd       = fopen( argv[ 12 ], "a+" );  assert( context.diskout_fd != NULL);
     context.monitor_fd       = fopen( argv[ 13 ], "a+" );  assert( context.monitor_fd != NULL);
-    context.monitor_yuv_fd   = fopen( argv[ 14 ], "a+" );  assert( context.monitor_yuv_fd != NULL);
+    context.monitor_yuv_fd   = fopen( argv[ 14 ], "ab+" );  assert( context.monitor_yuv_fd != NULL);
 }
 
 void close_FD_context() {
