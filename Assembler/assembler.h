@@ -77,6 +77,7 @@ typedef struct {
 typedef struct {
     char Lable_name[ BUFFER_MAX_SIZE ];
     int PC;
+    int is_created;
 } Lable;
 
 typedef struct {
@@ -132,12 +133,12 @@ char *registers[] = {
 void printCMD( Command CMD );
 
 /* Assembler Input/Output */
-void setCommand( Command *CMD, char **CMDArg );
+void setCommand( int pc, char **CMDArg );
 void parseLine( char *line );
 bool isLineEmptyOrNoteOnly( char *line );
 void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
-void setLable( Command *CMD, char *lableName );
+void setLable( int pc, char *lableName );
 void setMemory( char *line );
 void print_imemin( char *imemin_file );
 void print_dmemin( char *dmemin_file );
