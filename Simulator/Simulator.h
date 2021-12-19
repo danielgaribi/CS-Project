@@ -16,6 +16,9 @@
 #define NUM_OF_IO_REGISTERS 22
 #define CMD_LENGTH_HEX      12
 #define MEM_LENGTH_HEX      8
+#define LEDS_BUFFER_SIZE    19 /* 10 digits for uint32 timer (~2.1x10^10), 1 space, 8 leds status */
+#define PIXEL_BUFFER_SIZE   5
+#define MONITOR_SIZE        256
 
 #define SHIFT_IMM2           0
 #define SHIFT_IMM1           12
@@ -33,6 +36,7 @@
 #define MASK_RD             (uint64_t)  0xf     <<  SHIFT_RD
 #define MASK_OPCODE         (uint64_t)  0xff    <<  SHIFT_OPCODE
 #define MASK_12_LOWER_BITS  0xfff
+#define MASK_8_LOWER_BITS   0xff
 
 #define SET_CMD_VAL(_bin_cmd, _dest, _mask, _shift)    (_dest) = ((uint64_t) ((_bin_cmd) & (_mask))) >> (_shift)
 
@@ -154,11 +158,13 @@ void write_monitor_yuv_file();
 void add_to_trace_file(Command *cmd); /** need to add args */
 void add_to_hwregtrace_file(); /** need to add args */
 void add_to_display7seg_file(); /** need to add args */
+void addToledsTraceFile();
 
 void simulator();
 bool call_action(Command *cmd);
 void parse_cmd_line(char *line, int local_pc);
 bool isLineEmptyOrNoteOnly( char *line );
+void changeMonitor();
 
 void add (Command *cmd);
 void sub (Command *cmd);
