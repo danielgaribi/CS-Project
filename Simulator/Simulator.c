@@ -192,6 +192,9 @@ void out(Command *cmd) {
     else if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
+    else if ( ( rs_value + rt_value == display7seg ) && ( io_registers_values[ display7seg ] != rm_value ) ) {
+        addToDisplay7SegTraceFile();
+    }
 
     io_registers_values[rs_value + rt_value] = rm_value;
 }
@@ -199,11 +202,21 @@ void out(Command *cmd) {
 void addToledsTraceFile() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
-    char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */ 
-    sprintf(leds_status_str, "%d ", time);
-    sprintf(leds_status_str, "%08X", leds_status);
-    fputs(leds_status_str, context.led_fd);
-    fputs("\r\n", context.led_fd);
+    char leds_status_str[ BUFFER_SIZE ]; 
+    sprintf( leds_status_str, "%d ", time );
+    sprintf( leds_status_str, "%08X", leds_status );
+    fputs( leds_status_str, context.led_fd );
+    fputs( "\r\n", context.led_fd );
+}
+
+void addToDisplay7SegTraceFile() {
+    uint32_t time = registers_values[ timercurrent ];
+    uint32_t display7Seg_status = io_registers_values[ display7seg ];
+    char disp7seg_status_str[ BUFFER_SIZE ];
+    sprintf(disp7seg_status_str, "%d ", time );
+    sprintf( disp7seg_status_str, "%08X", display7Seg_status);
+    fputs( disp7seg_status_str, context.display7reg_fd );
+    fputs( "\r\n", context.display7reg_fd );
 }
 
 void changeMonitor() {

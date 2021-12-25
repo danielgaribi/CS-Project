@@ -16,7 +16,7 @@
 #define NUM_OF_IO_REGISTERS 22
 #define CMD_LENGTH_HEX      12
 #define MEM_LENGTH_HEX      8
-#define LEDS_BUFFER_SIZE    19 /* 10 digits for uint32 timer (~2.1x10^10), 1 space, 8 leds status */
+#define BUFFER_SIZE         32 
 #define PIXEL_BUFFER_SIZE   5
 #define MONITOR_SIZE        256
 
@@ -157,7 +157,7 @@ void write_monitor_yuv_file();
 
 void add_to_trace_file(Command *cmd); /** need to add args */
 void add_to_hwregtrace_file(); /** need to add args */
-void add_to_display7seg_file(); /** need to add args */
+void addToDisplay7SegTraceFile();
 void addToledsTraceFile();
 
 void simulator();
