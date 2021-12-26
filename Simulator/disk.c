@@ -1,6 +1,7 @@
 #include "disk.h"
 #include "Simulator.h"
 
+int diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
 
 void initDisk(){
     FILE *file;
@@ -58,4 +59,10 @@ int diskHandler(){
 
 }
 
-void diskToFile(){}
+void diskToFile(){
+    for(int sector = 0; sector < SECTOR_NUMBER; sector++){
+        for(int sectorIndex = 0; sectorIndex < SECTOR_SIZE; sectorIndex++){
+            fprintf(context.monitor_fd, "%08X\n", diskMemory[sector][sectorIndex]);
+        }
+    }
+}
