@@ -27,7 +27,7 @@ void hwRegTraceToFile(Command cmd){
     } else{
         mode = "READ";
     }
-    int index = io_registers_values[cmd.RS] + io_registers_values[cmd.RT];
+    int index = registers_values[cmd.RS] + registers_values[cmd.RT];
 
     int val;
     if(strcmp(cmd.Opcode, op_in) == 0){
