@@ -177,7 +177,13 @@ void reti(Command *cmd) {
 void in(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
-    registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+    if (rs_value + rt_value == monitorcmd) {
+        registers_values[cmd->RD] = 0; /* Reading from monitorcmd register return 0 */
+    }
+    else {
+        registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+    }
+    
 }
 
 void out(Command *cmd) {
@@ -281,6 +287,7 @@ void parse_cmd_line(char *line, int local_pc) {
     Command *cmd;
     bin_cmd = (uint64_t) strtol(line, NULL, 16);
     cmd = (Command*) malloc(sizeof(Command));
+    assert( cmd != NULL);
 
     cmd->PC = local_pc;
     strcpy_s(cmd->INST, CMD_LENGTH_HEX + 1, line);
@@ -341,8 +348,8 @@ void set_FD_context( char *argv[] ) {
 }
 
 void close_FD_context() {
-    fclose(context.imemin_fd);
-    fclose(context.dmemin_fd);
+    // fclose(context.imemin_fd);
+    // fclose(context.dmemin_fd);
     fclose(context.diskin_fd);
     fclose(context.irq2in_fd);
     fclose(context.dmemout_fd);

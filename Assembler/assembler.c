@@ -169,12 +169,17 @@ void setMemory( char *line ) {
     memIndex++;
 }
 
+
+bool isLableValid( char *lable ) { 
+    /* TODO: check if first letter is a letter and that all the rest is a letter or a number */
+}
+
 void parseLine( char *line ) { 
     char* next[BUFFER_MAX_SIZE] = { 0 };
     char *lableName, *fullCommand, *note, *token, *token2;
     char** commandStrings;
     int cmdPartIndex;
-    //Command *CMD = &CommandDB[ GlobalPC ];
+
     if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
         return;
     }
@@ -183,7 +188,7 @@ void parseLine( char *line ) {
     token = strtok_s( line, "#", &next );
     note = strtok_s( NULL, "#", &next );
     if ( note != NULL ) { /* line with comment */
-        strcpy_s(CommandDB[GlobalPC].Note, BUFFER_MAX_SIZE, note );
+        strcpy_s(CommandDB[GlobalPC].Note, BUFFER_MAX_SIZE, note ); /* TODO: change to 50? lable max length is 50*/
     }
 
     /* Split lable+command to 2 seperated parts */
@@ -194,6 +199,10 @@ void parseLine( char *line ) {
 
     if ( isLableFound ) {
         lableName = strtok_s( token, ":", &next );
+        if (!isLableValid) {
+            printf("Lable must start with a letter and than has only letters and numbers\n");
+            exit(1);
+        }
         setLable(GlobalPC, lableName );
         if ( !isCMDFound ) {
             return;
@@ -334,6 +343,7 @@ void print_dmemin( char *dmemin_file ) {
 int main( int argc, char *argv[] ) {
     char *asm_file_name, *imemin_file, *dmemin_file;
     FILE* file;
+
     /* Read program.asm (program file) - find labels's pc and update Lable2PC DB */
     assert( argc == 4 );
     asm_file_name = argv[1];
