@@ -60,9 +60,12 @@ int diskHandler(){
 }
 
 void diskToFile(){
+    char word[CMD_LENGTH_HEX+1];
     for(int sector = 0; sector < SECTOR_NUMBER; sector++){
         for(int sectorIndex = 0; sectorIndex < SECTOR_SIZE; sectorIndex++){
-            fprintf(context.monitor_fd, "%08X\n", diskMemory[sector][sectorIndex]);
+            sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
+		    fputs(word, context.diskout_fd);
+		    fputc("\r\n", context.diskout_fd);
         }
     }
 }
