@@ -1,8 +1,8 @@
 void registersToFile(void);
 void cyclesToFile(void);
 void memoryToFile(void);
-void hwRegTraceToFile(Command cmd);
-void traceToFile(Command cmd);
+void hwRegTraceToFile(Command *cmd);
+void traceToFile(Command *cmd);
 
 char *io_registers_names[] = { 
     "irq0enable",     
