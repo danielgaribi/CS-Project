@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+int clockCycles;
+int pc;
+
 /* Defines and Macros*/
 #define bool                int
 #define TRUE                1

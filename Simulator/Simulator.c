@@ -1,6 +1,7 @@
 #include "Simulator.h"
 #include "interrupt.h"
 #include "disk.h"
+#include "files.h"
 
 
 uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
@@ -9,10 +10,11 @@ uint32_t memory[MEM_SIZE] = { 0 };
 uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
-int pc;
+
 
 void simulator() {
     pc = 0;
+    clockCycles = 0;
     initInterrupts();
     initDisk();
 
@@ -23,7 +25,7 @@ void simulator() {
             break;
         }
         diskHandler();
-        //update clks
+        clockCycles++;
         updateInterrupts();
         interruptHandler();
 
@@ -36,7 +38,7 @@ void simulator() {
 bool call_action(Command *cmd) {
     registers_values[1] = cmd->Imm1;
     registers_values[2] = cmd->Imm2;
-    // add_to_trace_file(cmd, context.trace_fd);
+    traceToFile(cmd);
     switch (cmd->Opcode)
     {
         case op_add:
@@ -376,6 +378,11 @@ int main( int argc, char *argv[] ) {
     // read_irq2in_file(irq2in_file);
 
     simulator();
+
+    cyclesToFile();
+    registersToFile();
+    memoryToFile();
+
     close_FD_context();
 
     return 0;
