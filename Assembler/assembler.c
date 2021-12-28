@@ -169,9 +169,20 @@ void setMemory( char *line ) {
     memIndex++;
 }
 
-
 bool isLableValid( char *lable ) { 
-    /* TODO: check if first letter is a letter and that all the rest is a letter or a number */
+    char ch = lable[ 0 ];
+    /* Check if the first char is a letter */
+    if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')) ) {
+        return FALSE;
+    }
+    /* Check if the all other chars are letters or digits */
+    for (int i = 0; i < strlen(lable); i++) {
+        ch = lable[i];
+        if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ('0' <= ch && ch <= '9'))) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 void parseLine( char *line ) { 
