@@ -254,7 +254,8 @@ void print_pixel_monitor_file(int row, int col) {
 }
 
 void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
-    fwrite(&monitor[row][col], sizeof(uint8_t), 1, context.monitor_yuv_fd );
+    uint8_t pixel = monitor[row][col];
+    fwrite(&pixel, sizeof(uint8_t), 1, context.monitor_yuv_fd);
     fputs("\r\n", context.monitor_yuv_fd);
 }
 
