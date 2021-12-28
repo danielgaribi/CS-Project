@@ -59,12 +59,10 @@ void initInterrupts()// need to be called once before the "main loop"
 
 void initIrq2()
 {
-    FILE *file;
     char line[MAX_LINE_LENGTH];
     irq2ArrLen = 0;
     irq2Counter = 0;
-    file = fopen(irq2in_file, "r");
-    while (fgets(line, 500, file) != NULL)
+    while (fgets(line, 500, context.irq2in_fd) != NULL)
     {
         irq2ArrLen++;
     }
@@ -72,13 +70,13 @@ void initIrq2()
     if (irq2ArrLen == 0)
         return;
 
-    rewind(file);
+    rewind(context.irq2in_fd);
     irq2Arr = calloc(irq2ArrLen, sizeof(int));
 
     int index = 0;
-    while (fgets(line, 500, file) != NULL)
+    while (fgets(line, 500, context.irq2in_fd) != NULL)
     {
-        Irq2Array[index] = atoi(line);
+        Irq2Arr[index] = atoi(line);
         index++;
     }
 }
