@@ -7,7 +7,7 @@ void initDisk(){
     diskTimer = 0;
     char line[MAX_DISK_LINE_LENGTH];
     int lineIndex = 0;
-    while (fgets(line, 500, context.diskin_fd) != NULL)
+    while (fgets(line, MAX_LINE_LENGTH, context.diskin_fd) != NULL)
     {
        int sector = lineIndex / SECTOR_NUMBER;
        int sectorIndex = lineIndex % SECTOR_SIZE;
