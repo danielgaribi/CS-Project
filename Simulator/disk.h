@@ -1,3 +1,5 @@
+#ifndef DISK_H
+#define DISK_H
 
 #define SECTOR_NUMBER           128
 #define SECTOR_SIZE             128
@@ -10,3 +12,5 @@ void readFromDisk(void);
 void writeToDisk(void);
 int diskHandler(void);
 void diskToFile(void);
+
+#endif
