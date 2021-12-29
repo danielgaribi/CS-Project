@@ -267,7 +267,13 @@ void reti(Command *cmd) {
 void in(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
-    registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+    if (rs_value + rt_value == monitorcmd) {
+        registers_values[cmd->RD] = 0; /* Reading from monitorcmd register return 0 */
+    }
+    else {
+        registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+    }
+    
 }
 
 void out(Command *cmd) {
@@ -282,6 +288,9 @@ void out(Command *cmd) {
     else if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
+    else if ( ( rs_value + rt_value == display7seg ) && ( io_registers_values[ display7seg ] != rm_value ) ) {
+        addToDisplay7SegTraceFile();
+    }
 
     io_registers_values[rs_value + rt_value] = rm_value;
 }
@@ -289,11 +298,21 @@ void out(Command *cmd) {
 void addToledsTraceFile() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
-    char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */
-    sprintf_s(leds_status_str, LEDS_BUFFER_SIZE, "%d", time);
-    sprintf_s(leds_status_str, LEDS_BUFFER_SIZE, "%08X", leds_status);
-    fputs(leds_status_str, context.led_fd);
-    fputs("\r\n", context.led_fd);
+    char leds_status_str[ BUFFER_SIZE ]; 
+    sprintf( leds_status_str, "%d ", time );
+    sprintf( leds_status_str, "%08X", leds_status );
+    fputs( leds_status_str, context.led_fd );
+    fputs( "\r\n", context.led_fd );
+}
+
+void addToDisplay7SegTraceFile() {
+    uint32_t time = registers_values[ timercurrent ];
+    uint32_t display7Seg_status = io_registers_values[ display7seg ];
+    char disp7seg_status_str[ BUFFER_SIZE ];
+    sprintf(disp7seg_status_str, "%d ", time );
+    sprintf( disp7seg_status_str, "%08X", display7Seg_status);
+    fputs( disp7seg_status_str, context.display7reg_fd );
+    fputs( "\r\n", context.display7reg_fd );
 }
 
 void changeMonitor() {
@@ -323,7 +342,8 @@ void print_pixel_monitor_file(int row, int col) {
 }
 
 void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
-    fwrite(&monitor[row][col], sizeof(uint8_t), 1, context.monitor_yuv_fd );
+    uint8_t pixel = monitor[row][col];
+    fwrite(&pixel, sizeof(uint8_t), 1, context.monitor_yuv_fd);
     fputs("\r\n", context.monitor_yuv_fd);
 }
 
@@ -358,6 +378,7 @@ void parse_cmd_line(char *line, int local_pc) {
     Command *cmd;
     bin_cmd = (uint64_t) strtol(line, NULL, 16);
     cmd = (Command*) malloc(sizeof(Command));
+    assert( cmd != NULL);
 
     cmd->PC = local_pc;
     strcpy_s(cmd->INST, CMD_LENGTH_HEX + 1, line);
@@ -418,8 +439,8 @@ void set_FD_context( char *argv[] ) {
 }
 
 void close_FD_context() {
-    fclose(context.imemin_fd);
-    fclose(context.dmemin_fd);
+    // fclose(context.imemin_fd);
+    // fclose(context.dmemin_fd);
     fclose(context.diskin_fd);
     fclose(context.irq2in_fd);
     fclose(context.dmemout_fd);

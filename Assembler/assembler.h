@@ -13,7 +13,7 @@
 #define FALSE               0
 #define DB_NUM_COLS         2
 #define DB_MAX_NUM_LABLES   128
-#define BUFFER_MAX_SIZE     1024
+#define BUFFER_MAX_SIZE     1024 /* TODO: change to 500 - it is given that line max length is 500 */
 #define MAX_NUM_OF_COMMANDS 4096
 #define OPCODE_INDEX        1
 #define RD_INDEX            2
