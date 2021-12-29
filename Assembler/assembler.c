@@ -290,15 +290,15 @@ void print_imemin( char *imemin_file ) {
     int i;
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX+1];
-    FILE* file;
-    assert(fopen_s(&file, imemin_file, "w+") == 0);
+    FILE* file;    
+    assert(fopen_s(&file, imemin_file, "a+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < GlobalPC; i++) {
         cmd = parse_cmd_to_uint64_t(CommandDB[i]);
         sprintf_s(cmd_string, CMD_LENGTH_HEX + 1, "%012I64X", cmd);
         fputs(cmd_string, file);
-        fputs("\r\n", file);
+        fputs("\n", file);
     }
 
     fclose(file);
@@ -336,15 +336,14 @@ void print_dmemin( char *dmemin_file ) {
     int *memory = NULL;
     FILE *file;
     char mem_value_string[MEM_LENGTH_HEX+1];
-
     get_memory_array(&memory, &size);
-    assert(fopen_s(&file, dmemin_file, "w+") == 0);
+    assert(fopen_s(&file, dmemin_file, "a+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < size; i++) {
         sprintf_s(mem_value_string, MEM_LENGTH_HEX + 1, "%08x", memory[i]);
         fputs(mem_value_string, file);
-        fputs("\r\n", file);
+        fputs("\n", file);
     }
 
     fclose(file);
@@ -361,7 +360,7 @@ int main( int argc, char *argv[] ) {
     imemin_file = argv[2];
     dmemin_file = argv[3];
 
-    assert(fopen_s(&file, asm_file_name, "r") == 0);
+    assert(fopen_s(&file, asm_file_name, "a+") == 0);
     assert( file != NULL );
 
     char line[ BUFFER_MAX_SIZE ];
