@@ -57,7 +57,7 @@ int pc;
                                                                         _rm_value = registers_values[(_cmd)->RM];
 #define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          _rs_value = registers_values[(_cmd)->RS];\
                                                                         _rt_value = registers_values[(_cmd)->RT];
-
+#define CONVERT_12_BIT_TO_32_BIT_UNSIGNED(x)                            x = (x > 11) == 0 ? x : -1 ^ 0xFFF | x
 /*  
  * TODO: 
  * parse command into parts and enter command struct
@@ -154,7 +154,6 @@ void read_irq2in_file();
 void write_dmemout_file();
 void write_regout_file();
 void write_cycles_file();
-void write_leds_file();
 void write_diskout_file();
 void write_monitor_file();
 void write_monitor_yuv_file();

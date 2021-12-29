@@ -57,7 +57,7 @@ int diskHandler(){
 
 }
 
-void diskToFile(){
+void write_diskout_file(){
     char word[CMD_LENGTH_HEX+1];
     for(int sector = 0; sector < SECTOR_NUMBER; sector++){
         for(int sectorIndex = 0; sectorIndex < SECTOR_SIZE; sectorIndex++){
