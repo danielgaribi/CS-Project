@@ -11,10 +11,36 @@ uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
 
+char* io_registers_names[] = {
+    "irq0enable",
+    "irq1enable",
+    "irq2enable",
+    "irq0status",
+    "irq1status",
+    "irq2status",
+    "irqhandler",
+    "irqreturn",
+    "clks",
+    "leds",
+    "display7seg",
+    "timerenable",
+    "timercurrent",
+    "timermax",
+    "diskcmd",
+    "disksector",
+    "diskbuffer",
+    "diskstatus",
+    "reserved1",
+    "reserved2",
+    "monitoraddr",
+    "monitordata",
+    "monitorcmd"
+};
+
 
 void simulator() {
     pc = 0;
-    clockCycles = 0;
+    io_registers_values[clks] = 0;
     initInterrupts();
     initDisk();
 
@@ -25,12 +51,11 @@ void simulator() {
             break;
         }
         diskHandler();
-        clockCycles++;
+        io_registers_values[clks]++;
         updateInterrupts();
         interruptHandler();
 
         pc++;
-       
     }
     
 }
@@ -44,8 +69,71 @@ bool call_action(Command *cmd) {
         case op_add:
             add(cmd);
             break;
-        /* Add more cases ?? */
+        case op_sub:
+            sub(cmd);
+            break;
+        case op_mac:
+            mac(cmd);
+            break;
+        case op_and:
+            and (cmd);
+            break;
+        case op_or:
+            or (cmd);
+            break;
+        case op_xor:
+            xor (cmd);
+            break;
+        case op_sll:
+            sll(cmd);
+            break;
+        case op_sra:
+            sra(cmd);
+            break;
+        case op_srl:
+            srl(cmd);
+            break;
+        case op_beq:
+            beq(cmd);
+            break;
+        case op_bne:
+            bne(cmd);
+            break;
+        case op_blt:
+            blt(cmd);
+            break;
+        case op_bgt:
+            bgt(cmd);
+            break;
+        case op_ble:
+            ble(cmd);
+            break;
+        case op_bge:
+            bge(cmd);
+            break;
+        case op_jal:
+            jal(cmd);
+            break;
+        case op_lw:
+            lw(cmd);
+            break;
+        case op_sw:
+            sw(cmd);
+            break;
+        case op_reti:
+            reti(cmd);
+            break;
+        case op_in:
+            in(cmd);
+            break;
+        case op_out:
+            out(cmd);
+            break;
+        case op_halt:
+            assert(FALSE);
+            return FALSE;
     }
+    return TRUE;
 }
 void add(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
@@ -248,7 +336,7 @@ void changeMonitor() {
 
 void print_pixel_monitor_file(int row, int col) {
     char pixel_status_str[PIXEL_BUFFER_SIZE];
-    sprintf(pixel_status_str, "%02X", monitor[row][col]);
+    sprintf_s(pixel_status_str, LEDS_BUFFER_SIZE , "%02X", monitor[row][col]);
     fputs(pixel_status_str, context.led_fd);
     fputs("\r\n", context.monitor_fd);
 }

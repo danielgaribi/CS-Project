@@ -1,10 +1,13 @@
+#ifndef INTERRUPT_H
+#define INTERRUPT_H
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAX_LINE_LENGTH                
+#define MAX_LINE_LENGTH 1024 /** TODO ?????? value was missing - yuval plese add value*/
 
 
 void updateInterrupts();
@@ -13,3 +16,5 @@ void updateIrq2();
 int interruptHandler();
 void initInterrupts();
 void initIrq2();
+
+#endif
