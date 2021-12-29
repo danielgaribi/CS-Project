@@ -1,13 +1,6 @@
 #include "disk.h"
 #include "Simulator.h"
 
-extern uint32_t registers_values[NUM_OF_REGISTERS];
-extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
-extern uint32_t memory[MEM_SIZE];
-extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
-extern Command* commands[MAX_NUM_OF_COMMANDS];
-extern FD_Context context;
-
 int diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
 
 void initDisk(){

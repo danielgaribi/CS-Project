@@ -1,13 +1,6 @@
 #include "Simulator.h"
 #include "interrupt.h"
 
-extern uint32_t registers_values[NUM_OF_REGISTERS];
-extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
-extern uint32_t memory[MEM_SIZE];
-extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
-extern Command* commands[MAX_NUM_OF_COMMANDS];
-extern FD_Context context;
-
 int isInterrupt;
 int* irq2Arr;
 int irq2Counter;
@@ -20,19 +13,19 @@ void updateInterrupts() {  // need to be called at the end of every "main loop" 
 }
 
 void updateIrq0(){
-    if(registers_values[timerenable]){
-        if(registers_values[timercurrent] >= registers_values[timermax]){
-            registers_values[irq0status] = 1;
-            registers_values[timercurrent] = 0;
+    if(io_registers_values[timerenable]){
+        if(io_registers_values[timercurrent] >= io_registers_values[timermax]){
+            io_registers_values[irq0status] = 1;
+            io_registers_values[timercurrent] = 0;
         }
     } else{
-        registers_values[timercurrent]++;
+        io_registers_values[timercurrent]++;
     }
 }
 void updateIrq2(){
     if(irq2Counter < irq2ArrLen){
-        if(registers_values[clks] == irq2Arr[irq2Counter]){
-            registers_values[irq2status] = 1;
+        if(io_registers_values[clks] == irq2Arr[irq2Counter]){
+            io_registers_values[irq2status] = 1;
             irq2Counter++;
         }
     }
@@ -40,17 +33,17 @@ void updateIrq2(){
 
 int interruptHandler() // need to be called at the end of every "main loop" iteration
 {
-    int irq = (registers_values[irq0enable] && registers_values[irq0status]) ||
-              (registers_values[irq1enable] && registers_values[irq1status]) ||
-              (registers_values[irq2enable] && registers_values[irq2status]);
+    int irq = (io_registers_values[irq0enable] && io_registers_values[irq0status]) ||
+              (io_registers_values[irq1enable] && io_registers_values[irq1status]) ||
+              (io_registers_values[irq2enable] && io_registers_values[irq2status]);
     if (irq)
     {
         if (isInterrupt)
         {
             return;
         }
-        registers_values[irqreturn] = pc;
-        pc = registers_values[irqhandler];
+        io_registers_values[irqreturn] = pc;
+        pc = io_registers_values[irqhandler];
         isInterrupt = 1;
     }
     return;
@@ -59,7 +52,7 @@ int interruptHandler() // need to be called at the end of every "main loop" iter
 void initInterrupts()// need to be called once before the "main loop"
 {
     isInterrupt = 0;
-    initIrq2Arr();
+    initIrq2();
 }
 
 void initIrq2()
@@ -81,7 +74,7 @@ void initIrq2()
     int index = 0;
     while (fgets(line, 500, context.irq2in_fd) != NULL)
     {
-        Irq2Arr[index] = atoi(line);
+        irq2Arr[index] = atoi(line);
         index++;
     }
 }

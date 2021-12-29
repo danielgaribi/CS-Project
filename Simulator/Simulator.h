@@ -1,3 +1,5 @@
+#ifndef SIMULATOR_H 
+#define SIMULATOR_H 
 
 #include <stdio.h>
 #include <assert.h>
@@ -5,7 +7,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-int clockCycles;
 int pc;
 
 /* Defines and Macros*/
@@ -19,7 +20,7 @@ int pc;
 #define NUM_OF_IO_REGISTERS 22
 #define CMD_LENGTH_HEX      12
 #define MEM_LENGTH_HEX      8
-#define LEDS_BUFFER_SIZE    19 /* 10 digits for uint32 timer (~2.1x10^10), 1 space, 8 leds status */
+#define BUFFER_SIZE         32 
 #define PIXEL_BUFFER_SIZE   5
 #define MONITOR_SIZE        256
 
@@ -160,7 +161,7 @@ void write_monitor_yuv_file();
 
 void add_to_trace_file(Command *cmd); /** need to add args */
 void add_to_hwregtrace_file(); /** need to add args */
-void add_to_display7seg_file(); /** need to add args */
+void addToDisplay7SegTraceFile();
 void addToledsTraceFile();
 
 void simulator();
@@ -190,3 +191,13 @@ void sw  (Command *cmd);
 void reti(Command *cmd);
 void in  (Command *cmd);
 void out (Command *cmd);
+
+extern uint32_t registers_values[NUM_OF_REGISTERS];
+extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
+extern uint32_t memory[MEM_SIZE];
+extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
+extern Command* commands[MAX_NUM_OF_COMMANDS];
+extern FD_Context context;
+extern char* io_registers_names[];
+
+#endif
