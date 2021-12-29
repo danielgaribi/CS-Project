@@ -69,8 +69,71 @@ bool call_action(Command *cmd) {
         case op_add:
             add(cmd);
             break;
-        /* Add more cases ?? */
+        case op_sub:
+            sub(cmd);
+            break;
+        case op_mac:
+            mac(cmd);
+            break;
+        case op_and:
+            and (cmd);
+            break;
+        case op_or:
+            or (cmd);
+            break;
+        case op_xor:
+            xor (cmd);
+            break;
+        case op_sll:
+            sll(cmd);
+            break;
+        case op_sra:
+            sra(cmd);
+            break;
+        case op_srl:
+            srl(cmd);
+            break;
+        case op_beq:
+            beq(cmd);
+            break;
+        case op_bne:
+            bne(cmd);
+            break;
+        case op_blt:
+            blt(cmd);
+            break;
+        case op_bgt:
+            bgt(cmd);
+            break;
+        case op_ble:
+            ble(cmd);
+            break;
+        case op_bge:
+            bge(cmd);
+            break;
+        case op_jal:
+            jal(cmd);
+            break;
+        case op_lw:
+            lw(cmd);
+            break;
+        case op_sw:
+            sw(cmd);
+            break;
+        case op_reti:
+            reti(cmd);
+            break;
+        case op_in:
+            in(cmd);
+            break;
+        case op_out:
+            out(cmd);
+            break;
+        case op_halt:
+            assert(FALSE);
+            return FALSE;
     }
+    return TRUE;
 }
 void add(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
