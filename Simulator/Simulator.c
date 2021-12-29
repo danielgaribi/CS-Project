@@ -201,9 +201,9 @@ void out(Command *cmd) {
 void addToledsTraceFile() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
-    char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */ 
-    sprintf(leds_status_str, "%d ", time);
-    sprintf(leds_status_str, "%08X", leds_status);
+    char leds_status_str[ LEDS_BUFFER_SIZE ]; /* TODO: check buffer size is big enough */
+    sprintf_s(leds_status_str, LEDS_BUFFER_SIZE, "%d", time);
+    sprintf_s(leds_status_str, LEDS_BUFFER_SIZE, "%08X", leds_status);
     fputs(leds_status_str, context.led_fd);
     fputs("\r\n", context.led_fd);
 }
@@ -229,7 +229,7 @@ void changeMonitor() {
 
 void print_pixel_monitor_file(int row, int col) {
     char pixel_status_str[PIXEL_BUFFER_SIZE];
-    sprintf(pixel_status_str, "%02X", monitor[row][col]);
+    sprintf_s(pixel_status_str, LEDS_BUFFER_SIZE , "%02X", monitor[row][col]);
     fputs(pixel_status_str, context.led_fd);
     fputs("\r\n", context.monitor_fd);
 }

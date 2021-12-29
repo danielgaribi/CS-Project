@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\Simulator.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\files.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\disk.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Simulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\files.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
