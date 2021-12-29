@@ -63,6 +63,7 @@ void add_to_trace_file(Command *cmd){
 	}
 	fputc("\r\n", context.trace_fd);
 
+
 	if (cmd->Opcode == op_out || cmd->Opcode == op_in)
 		add_to_hwregtrace_file(cmd);
 }
