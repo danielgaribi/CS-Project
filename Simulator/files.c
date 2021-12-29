@@ -1,8 +1,12 @@
 #include "Simulator.h"
 #include "files.h"
 
-
-
+extern uint32_t registers_values[NUM_OF_REGISTERS];
+extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
+extern uint32_t memory[MEM_SIZE];
+extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
+extern Command* commands[MAX_NUM_OF_COMMANDS];
+extern FD_Context context;
 
 void registersToFile(){
 	char word[CMD_LENGTH_HEX+1];
@@ -30,19 +34,19 @@ void cyclesToFile(){
 
 }
 
-void hwRegTraceToFile(Command cmd){
-	char ;line[4*CMD_LENGTH_HEX+4];
+void hwRegTraceToFile(Command *cmd){
+	char line[4*CMD_LENGTH_HEX+4];
     char* mode;
-    if(cmd.Opcode == op_out){
+    if(cmd->Opcode == op_out){
         mode = "WRITE";
     } else{
         mode = "READ";
     }
-    int index = registers_values[cmd.RS] + registers_values[cmd.RT];
+    int index = registers_values[cmd->RS] + registers_values[cmd->RT];
 
     int val;
-    if(strcmp(cmd.Opcode, op_in) == 0){
-        val = io_registers_values[cmd.RD];
+    if(strcmp(cmd->Opcode, op_in) == 0){
+        val = io_registers_values[cmd->RD];
     } else{
         val = io_registers_values[index];
     }    
@@ -57,9 +61,9 @@ void hwRegTraceToFile(Command cmd){
 
 
 
-void traceToFile(Command cmd){
+void traceToFile(Command *cmd){
 	char word[2*CMD_LENGTH_HEX+2];
-	sprintf_s(word, CMD_LENGTH_HEX + 1, "%03X %s", cmd.PC, cmd.INST);
+	sprintf_s(word, CMD_LENGTH_HEX + 1, "%03X %s", cmd->PC, cmd->INST);
 	fputs(word, context.trace_fd);
 
 	for (int i = 0; i < NUM_OF_REGISTERS; i++){
@@ -68,6 +72,6 @@ void traceToFile(Command cmd){
 	}
 	fputc("\r\n", context.trace_fd);
 
-	if (cmd.Opcode == op_out || cmd.Opcode == op_in))
+	if (cmd->Opcode == op_out || cmd->Opcode == op_in)
 		hwRegTraceToFile(cmd);
 }

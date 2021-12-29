@@ -1,6 +1,12 @@
 #include "Simulator.h"
 #include "interrupt.h"
 
+extern uint32_t registers_values[NUM_OF_REGISTERS];
+extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
+extern uint32_t memory[MEM_SIZE];
+extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
+extern Command* commands[MAX_NUM_OF_COMMANDS];
+extern FD_Context context;
 
 int isInterrupt;
 int* irq2Arr;
@@ -9,9 +15,8 @@ int irq2ArrLen;
 
 
 void updateInterrupts() {  // need to be called at the end of every "main loop" iteration before interruptHandler()
-    updateIrq0()
+    updateIrq0();
     updateIrq2();
-
 }
 
 void updateIrq0(){

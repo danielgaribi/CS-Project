@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAX_LINE_LENGTH                
+#define MAX_LINE_LENGTH 1024 /** TODO ?????? value was missing - yuval plese add value*/
 
 
 void updateInterrupts();
