@@ -11,12 +11,10 @@ extern FD_Context context;
 int diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
 
 void initDisk(){
-    FILE *file;
     diskTimer = 0;
     char line[MAX_DISK_LINE_LENGTH];
-    fopen_s(&file, diskin_file, "r");
     int lineIndex = 0;
-    while (fgets(line, 500, file) != NULL)
+    while (fgets(line, 500, context.diskin_fd) != NULL)
     {
        int sector = lineIndex / SECTOR_NUMBER;
        int sectorIndex = lineIndex % SECTOR_SIZE;
