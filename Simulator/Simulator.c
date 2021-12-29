@@ -11,10 +11,36 @@ uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
 
+char* io_registers_names[] = {
+    "irq0enable",
+    "irq1enable",
+    "irq2enable",
+    "irq0status",
+    "irq1status",
+    "irq2status",
+    "irqhandler",
+    "irqreturn",
+    "clks",
+    "leds",
+    "display7seg",
+    "timerenable",
+    "timercurrent",
+    "timermax",
+    "diskcmd",
+    "disksector",
+    "diskbuffer",
+    "diskstatus",
+    "reserved1",
+    "reserved2",
+    "monitoraddr",
+    "monitordata",
+    "monitorcmd"
+};
+
 
 void simulator() {
     pc = 0;
-    clockCycles = 0;
+    io_registers_values[clks] = 0;
     initInterrupts();
     initDisk();
 
@@ -25,12 +51,11 @@ void simulator() {
             break;
         }
         diskHandler();
-        clockCycles++;
+        io_registers_values[clks]++;
         updateInterrupts();
         interruptHandler();
 
         pc++;
-       
     }
     
 }

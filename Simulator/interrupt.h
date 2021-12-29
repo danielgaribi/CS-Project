@@ -1,3 +1,6 @@
+#ifndef INTERRUPT_H
+#define INTERRUPT_H
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -13,3 +16,5 @@ void updateIrq2();
 int interruptHandler();
 void initInterrupts();
 void initIrq2();
+
+#endif

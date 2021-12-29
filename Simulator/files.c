@@ -1,13 +1,6 @@
 #include "Simulator.h"
 #include "files.h"
 
-extern uint32_t registers_values[NUM_OF_REGISTERS];
-extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
-extern uint32_t memory[MEM_SIZE];
-extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
-extern Command* commands[MAX_NUM_OF_COMMANDS];
-extern FD_Context context;
-
 void registersToFile(){
 	char word[CMD_LENGTH_HEX+1];
 	for (int i = 2; i < NUM_OF_REGISTERS; i++){
@@ -28,7 +21,7 @@ void memoryToFile(){
 
 void cyclesToFile(){
 	char word[CMD_LENGTH_HEX+1];
-	sprintf_s(word, CMD_LENGTH_HEX + 1, "%d", clockCycles);
+	sprintf_s(word, CMD_LENGTH_HEX + 1, "%d", io_registers_values[clks]);
 	fputs(word, context.cycles_fd);
 	fputc("\r\n", context.cycles_fd);
 
@@ -53,7 +46,7 @@ void hwRegTraceToFile(Command *cmd){
 		
 
 	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08X", 
-		clockCycles + 1, mode, io_registers_names[index], val);
+		io_registers_values[clks] + 1, mode, io_registers_names[index], val);
 	fputs(line, context.hwregtrace_fd);
 	fputc("\r\n", context.hwregtrace_fd);
 

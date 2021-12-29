@@ -1,3 +1,5 @@
+#ifndef SIMULATOR_H 
+#define SIMULATOR_H 
 
 #include <stdio.h>
 #include <assert.h>
@@ -5,7 +7,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-int clockCycles;
 int pc;
 
 /* Defines and Macros*/
@@ -190,3 +191,13 @@ void sw  (Command *cmd);
 void reti(Command *cmd);
 void in  (Command *cmd);
 void out (Command *cmd);
+
+extern uint32_t registers_values[NUM_OF_REGISTERS];
+extern uint32_t io_registers_values[NUM_OF_IO_REGISTERS];
+extern uint32_t memory[MEM_SIZE];
+extern uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE];
+extern Command* commands[MAX_NUM_OF_COMMANDS];
+extern FD_Context context;
+extern char* io_registers_names[];
+
+#endif
