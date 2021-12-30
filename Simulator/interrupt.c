@@ -65,9 +65,9 @@ void initIrq2()
         irq2ArrLen++;
     }
 
-    if (irq2ArrLen == 0)
+    if (irq2ArrLen == 0){
         return;
-
+    }
     rewind(context.irq2in_fd);
     irq2Arr = calloc(irq2ArrLen, sizeof(int));
 
