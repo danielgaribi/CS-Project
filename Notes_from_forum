@@ -1,0 +1,29 @@
+Asm:
+[] - Circle - instruction to check cirle.asm (https://moodle.tau.ac.il/mod/forum/discuss.php?d=28522#p37693, https://moodle.tau.ac.il/mod/forum/discuss.php?d=44629)
+[] - ***importent*** Binum & mulmat - must set initial memory using .word before running the progrem (https://moodle.tau.ac.il/mod/forum/discuss.php?d=35211) 
+[] - disk - sector 1 and 0 are equel at the end of the run (https://moodle.tau.ac.il/mod/forum/discuss.php?d=31999)
+
+Assembler:
+[V] - lower case for opcodes and registers names (https://moodle.tau.ac.il/mod/forum/discuss.php?d=34115)
+[] - ***importent*** printing next line using '/r' and not '/n' (https://moodle.tau.ac.il/mod/forum/discuss.php?d=37484)
+
+Simulator:
+[] - diskin.txt - instruction for printing (https://moodle.tau.ac.il/mod/forum/discuss.php?d=30661)
+[] - timer.txt and diskin.txt as input - must set those file for simulator, even if empty (https://moodle.tau.ac.il/mod/forum/discuss.php?d=31712)
+[] - input file can contain Hex with lower and upper letters, even in the same line (https://moodle.tau.ac.il/mod/forum/discuss.php?d=27957)
+[] - Disk - instruction to set the memory as a cyclic memory (https://moodle.tau.ac.il/mod/forum/discuss.php?d=33373)
+[] - interrupt flow for 2 interrupts together (https://moodle.tau.ac.il/mod/forum/discuss.php?d=36815, https://moodle.tau.ac.il/mod/forum/discuss.php?d=40772, https://moodle.tau.ac.il/mod/forum/discuss.php?d=44888)
+[] long explanation about interrupts (https://moodle.tau.ac.il/mod/forum/discuss.php?d=44117)
+[] - shifter with negative number (https://moodle.tau.ac.il/mod/forum/discuss.php?d=36996)
+[] - ***importent*** printing next line using '/r' and not '/n' (https://moodle.tau.ac.il/mod/forum/discuss.php?d=37484)
+[] - no relations between timer and disk in simulator unless the assembler coded that way (https://moodle.tau.ac.il/mod/forum/discuss.php?d=42071)
+[] - ***importent*** simulator must not crush for ileagal input, no valid opcode for example. should add defult for switch and exit cleanly? (https://moodle.tau.ac.il/mod/forum/discuss.php?d=42897)
+[] - read regs as signed numbers for opcode such as mac, slt.. (https://moodle.tau.ac.il/mod/forum/discuss.php?d=43480)
+[V] - we can print lower and upper case letter, and should be able to read them both (https://moodle.tau.ac.il/mod/forum/discuss.php?d=44652)
+[] - ***importent*** timer - the time printed to the file is not the one from the register clk but another counter, use 64 bit (https://moodle.tau.ac.il/mod/forum/discuss.php?d=43496)
+[] - timer getting to max value (https://moodle.tau.ac.il/mod/forum/discuss.php?d=46451)
+
+Subbmission:
+[] - Assembler and Simulator in diffrent project and can take args from VS and from CMD (https://moodle.tau.ac.il/mod/forum/discuss.php?d=34824)
+[] - how to subbmit zip (https://moodle.tau.ac.il/mod/forum/discuss.php?d=42546, https://moodle.tau.ac.il/mod/forum/discuss.php?d=46124, https://moodle.tau.ac.il/mod/forum/discuss.php?d=46582)
+[] - insruction for PDF (https://moodle.tau.ac.il/mod/forum/discuss.php?d=31871)
