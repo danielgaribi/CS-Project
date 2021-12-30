@@ -1,7 +1,7 @@
 .word 0x100 9
 .word 0x101 5
 
-# expected: 3024 
+# expected: 126 
 
 os:
     sll $sp, $imm1, $imm2, $zero, 1, 11             # set $sp = 1 << 11 = 2048
