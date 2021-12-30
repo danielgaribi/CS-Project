@@ -46,18 +46,18 @@ void simulator() {
 
     while (TRUE) {
         registers_values[0] = 0; /* set $zero to 0 */
+        interruptHandler();
         if (commands[pc] == NULL) {
             assert(FALSE);
             break;
         }
         if (call_action(commands[pc]) == FALSE) {
+            io_registers_values[clks]++;
             break;
         }
         diskHandler();
-        io_registers_values[clks]++;
         updateInterrupts();
-        interruptHandler();
-
+        io_registers_values[clks]++;
         pc++;
     }
     
@@ -128,9 +128,11 @@ bool call_action(Command *cmd) {
             break;
         case op_in:
             in(cmd);
+            add_to_hwregtrace_file(cmd);
             break;
         case op_out:
             out(cmd);
+            add_to_hwregtrace_file(cmd);
             break;
         case op_halt:
             return FALSE;
@@ -266,7 +268,8 @@ void sw(Command *cmd) {
 }
 
 void reti(Command *cmd) {
-    pc = io_registers_values[irqreturn] - 1; /** pc will increment in main loop by one */
+    pc = io_registers_values[irqreturn]; /** pc will increment in main loop by one */
+    return_from_interrupt();
 }
 
 void in(Command *cmd) {
@@ -282,40 +285,39 @@ void in(Command *cmd) {
 }
 
 void out(Command *cmd) {
+    int is_changed = FALSE;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    
-    /* If command changes leds status, append to ledsFile */
-    if ( ( rs_value + rt_value == leds ) && ( io_registers_values [ leds ] != rm_value ) ) {
-        addToledsTraceFile();
-    }
     /* If command set monitorcmd to 1, change monitor status */
-    else if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
+    if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
-    else if ( ( rs_value + rt_value == display7seg ) && ( io_registers_values[ display7seg ] != rm_value ) ) {
-        addToDisplay7SegTraceFile();
-    }
 
+    is_changed = io_registers_values[display7seg] != rm_value;
     io_registers_values[rs_value + rt_value] = rm_value;
+
+    if ((rs_value + rt_value == display7seg) && is_changed) {
+        add_to_display_7_seg_trace_file();
+    }
+    /* If command changes leds status, append to ledsFile */
+    else if ((rs_value + rt_value == leds) && is_changed) {
+        add_to_leds_trace_file();
+    }
 }
 
-void addToledsTraceFile() {
+void add_to_leds_trace_file() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
     char leds_status_str[ BUFFER_SIZE ]; 
-    sprintf_s( leds_status_str, BUFFER_SIZE, "%d ", time );
-    sprintf_s( leds_status_str, BUFFER_SIZE, "%08X", leds_status );
+    sprintf_s( leds_status_str, BUFFER_SIZE, "%d %08x", io_registers_values[clks], leds_status );
     fputs( leds_status_str, context.led_fd );
     fputs( "\r\n", context.led_fd );
 }
 
-void addToDisplay7SegTraceFile() {
-    uint32_t time = registers_values[ timercurrent ];
+void add_to_display_7_seg_trace_file() {
     uint32_t display7Seg_status = io_registers_values[ display7seg ];
     char disp7seg_status_str[ BUFFER_SIZE ];
-    sprintf_s(disp7seg_status_str, BUFFER_SIZE, "%d ", time );
-    sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%08X", display7Seg_status);
+    sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%d %08x", io_registers_values[ clks ], display7Seg_status );
     fputs( disp7seg_status_str, context.display7reg_fd );
     fputs( "\r\n", context.display7reg_fd );
 }
@@ -440,7 +442,7 @@ void set_FD_context( char *argv[] ) {
     assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "w+") == 0);    assert(context.display7reg_fd != NULL);
     assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "w+") == 0);    assert(context.diskout_fd != NULL);
     assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "w+") == 0);    assert(context.monitor_fd != NULL);
-    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "w+") == 0);   assert(context.monitor_yuv_fd != NULL);
+    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
 }
 
 void close_FD_context() {

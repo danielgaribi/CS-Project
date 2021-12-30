@@ -160,8 +160,8 @@ void write_monitor_yuv_file();
 
 void add_to_trace_file(Command *cmd); /** need to add args */
 void add_to_hwregtrace_file(); /** need to add args */
-void addToDisplay7SegTraceFile();
-void addToledsTraceFile();
+void add_to_display_7_seg_trace_file();
+void add_to_leds_trace_file();
 
 void simulator();
 bool call_action(Command *cmd);

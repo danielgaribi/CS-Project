@@ -14,6 +14,7 @@ void updateInterrupts();
 void updateIrq0();
 void updateIrq2();
 int interruptHandler();
+void return_from_interrupt();
 void initInterrupts();
 void initIrq2();
 
