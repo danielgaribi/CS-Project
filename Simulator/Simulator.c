@@ -308,12 +308,11 @@ void out(Command *cmd) {
 }
 
 void add_to_leds_trace_file() {
-    uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
     char leds_status_str[ BUFFER_SIZE ]; 
     sprintf_s( leds_status_str, BUFFER_SIZE, "%d %08x", innerClks, leds_status );
     fputs( leds_status_str, context.led_fd );
-    fputs( "\r\n", context.led_fd );
+    fputs( "\r", context.led_fd );
 }
 
 void add_to_display_7_seg_trace_file() {
@@ -321,7 +320,7 @@ void add_to_display_7_seg_trace_file() {
     char disp7seg_status_str[ BUFFER_SIZE ];
     sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%d %08x", innerClks, display7Seg_status );
     fputs( disp7seg_status_str, context.display7reg_fd );
-    fputs( "\r\n", context.display7reg_fd );
+    fputs( "\r", context.display7reg_fd );
 }
 
 void changeMonitor() {
@@ -346,21 +345,21 @@ void changeMonitor() {
 void print_pixel_monitor_file(int row, int col) {
     char pixel_status_str[PIXEL_BUFFER_SIZE];
     sprintf_s(pixel_status_str, PIXEL_BUFFER_SIZE, "%02X", monitor[row][col]);
-    fputs(pixel_status_str, context.led_fd);
-    fputs("\r\n", context.monitor_fd);
+    fputs(pixel_status_str, context.monitor_fd);
+    fputs("\r", context.monitor_fd);
 }
 
 void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
     uint8_t pixel = monitor[row][col];
     fwrite(&pixel, sizeof(uint8_t), 1, context.monitor_yuv_fd);
-    fputs("\r\n", context.monitor_yuv_fd);
+    fputs("\r", context.monitor_yuv_fd);
 }
 
 void write_monitor_file() {
     for (int row = 0; row < MONITOR_SIZE; row++) {
         for (int col = 0; col < MONITOR_SIZE; col++) {
             print_pixel_monitor_file(row, col);
-            print_pixel_monitor_yuv_file(row, col);
+            //print_pixel_monitor_yuv_file(row, col);
         }
     }
 }
@@ -431,20 +430,20 @@ bool isLineEmptyOrNoteOnly( char *line ) {
 }
 
 void set_FD_context( char *argv[] ) {
-    assert(fopen_s(&(context.imemin_fd),        argv[ 1 ], "r") == 0);     assert(context.imemin_fd != NULL);
-    assert(fopen_s(&(context.dmemin_fd),        argv[ 2 ], "r") == 0);     assert(context.dmemin_fd != NULL);
-    assert(fopen_s(&(context.diskin_fd),        argv[ 3 ], "r") == 0);     assert(context.diskin_fd != NULL);
-    assert(fopen_s(&(context.irq2in_fd),        argv[ 4 ], "r") == 0);     assert(context.irq2in_fd != NULL);
-    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "w+") == 0);     assert(context.dmemout_fd != NULL);
-    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "w+") == 0);     assert(context.regout_fd != NULL);
-    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "w+") == 0);     assert(context.trace_fd != NULL);
-    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "w+") == 0);     assert(context.hwregtrace_fd != NULL);
-    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "w+") == 0);     assert(context.cycles_fd != NULL);
-    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "w+") == 0);    assert(context.led_fd != NULL);
-    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "w+") == 0);    assert(context.display7reg_fd != NULL);
-    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "w+") == 0);    assert(context.diskout_fd != NULL);
-    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "w+") == 0);    assert(context.monitor_fd != NULL);
-    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
+    assert(fopen_s(&(context.imemin_fd),        argv[ 1 ], "r") == 0);      assert(context.imemin_fd != NULL);
+    assert(fopen_s(&(context.dmemin_fd),        argv[ 2 ], "r") == 0);      assert(context.dmemin_fd != NULL);
+    assert(fopen_s(&(context.diskin_fd),        argv[ 3 ], "r") == 0);      assert(context.diskin_fd != NULL);
+    assert(fopen_s(&(context.irq2in_fd),        argv[ 4 ], "r") == 0);      assert(context.irq2in_fd != NULL);
+    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "a+") == 0);     assert(context.dmemout_fd != NULL);
+    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "a+") == 0);     assert(context.regout_fd != NULL);
+    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "a+") == 0);     assert(context.trace_fd != NULL);
+    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "a+") == 0);     assert(context.hwregtrace_fd != NULL);
+    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "a+") == 0);     assert(context.cycles_fd != NULL);
+    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "a+") == 0);    assert(context.led_fd != NULL);
+    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "a+") == 0);    assert(context.display7reg_fd != NULL);
+    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "a+") == 0);    assert(context.diskout_fd != NULL);
+    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "a+") == 0);    assert(context.monitor_fd != NULL);
+    //assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
 }
 
 void close_FD_context() {
@@ -461,7 +460,7 @@ void close_FD_context() {
     fclose(context.display7reg_fd);
     fclose(context.diskout_fd);
     fclose(context.monitor_fd);
-    fclose(context.monitor_yuv_fd);
+    //fclose(context.monitor_yuv_fd);
 }
 
 int main( int argc, char *argv[] ) {
@@ -481,6 +480,7 @@ int main( int argc, char *argv[] ) {
     write_regout_file();
     write_dmemout_file();
     write_diskout_file();
+    write_monitor_file();
 
     close_FD_context();
 
