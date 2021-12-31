@@ -18,8 +18,9 @@ void updateIrq0(){
             io_registers_values[irq0status] = 1;
             io_registers_values[timercurrent] = 0;
         }
-    } else{
+       else{
         io_registers_values[timercurrent]++;
+       }
     }
 }
 void updateIrq2(){
