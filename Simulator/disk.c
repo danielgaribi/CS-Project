@@ -34,7 +34,7 @@ void writeToDisk() {
     }
 }
 
-int diskHandler() {
+void diskHandler() {
 
     if(io_registers_values[diskcmd] != 0) {
         io_registers_values[diskstatus] = 1;
