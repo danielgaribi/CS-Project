@@ -11,6 +11,6 @@ int diskTimer;
 void initDisk(void);
 void readFromDisk(void);
 void writeToDisk(void);
-int diskHandler(void);
+void diskHandler(void);
 
 #endif
