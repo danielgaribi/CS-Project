@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 int pc;
+uint64_t clks;
 
 /* Defines and Macros*/
 #define bool                int
