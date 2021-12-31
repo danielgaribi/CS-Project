@@ -59,13 +59,8 @@ uint64_t innerClks;
 #define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          _rs_value = registers_values[(_cmd)->RS];\
                                                                         _rt_value = registers_values[(_cmd)->RT];
 #define CONVERT_12_BIT_TO_32_BIT_UNSIGNED(x)                            (x >> 11) == 0 ? x : -1 ^ 0xFFF | x
-/*  
- * TODO: 
- * parse command into parts and enter command struct
- */
 
 /* Structs and Enums*/
-
 enum opcode {
     op_add  = 0,
     op_sub  = 1,
