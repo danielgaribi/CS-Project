@@ -20,6 +20,7 @@ void updateIrq0(){
         }
     } else {
         io_registers_values[timercurrent]++;
+       }
     }
 }
 void updateIrq2(){

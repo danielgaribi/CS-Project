@@ -1,3 +1,44 @@
+
+.word 0x100 15
+.word 0x101 14
+.word 0x102 13
+.word 0x103 12
+.word 0x104 11
+.word 0x105 10
+.word 0x106 9
+.word 0x107 8
+.word 0x108 7
+.word 0x109 6
+.word 0x10A 5
+.word 0x10B 4
+.word 0x10C 3
+.word 0x10D 2
+.word 0x10E 1
+.word 0x10F 0
+
+.word 0x110 0
+.word 0x111 -5
+.word 0x112 -3
+.word 0x113 1
+.word 0x114 0
+.word 0x115 26
+.word 0x116 9
+.word 0x117 -26
+.word 0x118 0
+.word 0x119 24
+.word 0x11A -2
+.word 0x11B 6
+.word 0x11C 0
+.word 0x11D 23
+.word 0x11E -3
+.word 0x11f 10
+
+# expected: 
+# [ 0 877 19 -151 ]
+# [ 0 605 15 -115 ]
+# [ 0 333 11 -79 ]
+# [ 0 61 7 -43 ]
+
         sll $sp, $imm1, $imm2, $zero, 1, 11                 # set $sp = 1 << 11 = 2048
 		add $sp, $sp, $imm2, $zero, 0, -5  	                # adjust stack for 5 items
 		sw $s0, $sp, $imm2, $zero, 0, 4 				    # store value of s0 in stack
