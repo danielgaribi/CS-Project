@@ -34,7 +34,7 @@ void write_dmemout_file() {
 
 void write_cycles_file() {
 	char word[CMD_LENGTH_HEX+1];
-	sprintf_s(word, CMD_LENGTH_HEX + 1, "%d", clks);
+	sprintf_s(word, CMD_LENGTH_HEX + 1, "%d", innerClks);
 	fputs(word, context.cycles_fd);
 	fputs("\r\n", context.cycles_fd);
 }
@@ -58,7 +58,7 @@ void add_to_hwregtrace_file(Command *cmd) {
 		
 
 	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08x", 
-		clks, mode, io_registers_names[index], val);
+		innerClks, mode, io_registers_names[index], val);
 	fputs(line, context.hwregtrace_fd);
 	fputs("\r\n", context.hwregtrace_fd);
 

@@ -53,13 +53,13 @@ void simulator() {
         }
         if (call_action(commands[pc]) == FALSE) {
             io_registers_values[clks]++;
-            clks++;
+            innerClks++;
             break;
         }
         diskHandler();
         updateInterrupts();
         io_registers_values[clks]++;
-        clks++;
+        innerClks++;
         pc++;
     }
     
@@ -311,7 +311,7 @@ void add_to_leds_trace_file() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
     char leds_status_str[ BUFFER_SIZE ]; 
-    sprintf_s( leds_status_str, BUFFER_SIZE, "%d %08x", clks, leds_status );
+    sprintf_s( leds_status_str, BUFFER_SIZE, "%d %08x", innerClks, leds_status );
     fputs( leds_status_str, context.led_fd );
     fputs( "\r\n", context.led_fd );
 }
@@ -319,7 +319,7 @@ void add_to_leds_trace_file() {
 void add_to_display_7_seg_trace_file() {
     uint32_t display7Seg_status = io_registers_values[ display7seg ];
     char disp7seg_status_str[ BUFFER_SIZE ];
-    sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%d %08x", clks, display7Seg_status );
+    sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%d %08x", innerClks, display7Seg_status );
     fputs( disp7seg_status_str, context.display7reg_fd );
     fputs( "\r\n", context.display7reg_fd );
 }
