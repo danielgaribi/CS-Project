@@ -7,7 +7,7 @@ void write_regout_file() {
 	for (i = 3; i < NUM_OF_REGISTERS; i++){
 		sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", registers_values[i]);
 		fputs(word, context.regout_fd);
-		fputs("\r\n", context.regout_fd);
+		fputs("\r", context.regout_fd);
 	}
 }
 
@@ -23,11 +23,11 @@ void write_dmemout_file() {
 		for (j = 0; j < zero_counter; j++) {
 			sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", 0);
 			fputs(word, context.dmemout_fd);
-			fputs("\r\n", context.dmemout_fd);
+			fputs("\r", context.dmemout_fd);
 		}
 		sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", memory[i]);
 		fputs(word, context.dmemout_fd);
-		fputs("\r\n", context.dmemout_fd);
+		fputs("\r", context.dmemout_fd);
 		zero_counter = 0;
 	}
 }
@@ -36,7 +36,7 @@ void write_cycles_file() {
 	char word[CMD_LENGTH_HEX+1];
 	sprintf_s(word, CMD_LENGTH_HEX + 1, "%d", innerClks);
 	fputs(word, context.cycles_fd);
-	fputs("\r\n", context.cycles_fd);
+	fputs("\r", context.cycles_fd);
 }
 
 void add_to_hwregtrace_file(Command *cmd) {
@@ -60,7 +60,7 @@ void add_to_hwregtrace_file(Command *cmd) {
 	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08x", 
 		innerClks, mode, io_registers_names[index], val);
 	fputs(line, context.hwregtrace_fd);
-	fputs("\r\n", context.hwregtrace_fd);
+	fputs("\r", context.hwregtrace_fd);
 
 }
 
@@ -74,5 +74,5 @@ void add_to_trace_file(Command *cmd) {
 		sprintf_s(word, 2*CMD_LENGTH_HEX+2, " %08x",  registers_values[i]);
         fputs(word, context.trace_fd);
 	}
-	fputs("\r\n", context.trace_fd);
+	fputs("\r", context.trace_fd);
 }
