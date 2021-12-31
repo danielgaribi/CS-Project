@@ -42,22 +42,22 @@ int pc;
 #define MASK_12_LOWER_BITS  0xfff
 #define MASK_8_LOWER_BITS   0xff
 
-#define SET_CMD_VAL(_bin_cmd, _dest, _mask, _shift)    (_dest) = ((uint64_t) ((_bin_cmd) & (_mask))) >> (_shift)
+#define SET_CMD_VAL(_bin_cmd, _mask, _shift)           ((uint64_t) ((_bin_cmd) & (_mask))) >> (_shift)
 
-#define SET_IMM1(_bin_cmd, _cmd)                       SET_CMD_VAL((_bin_cmd), (_cmd)->Imm1,   MASK_IMM1,   SHIFT_IMM1)
-#define SET_IMM2(_bin_cmd, _cmd)                       SET_CMD_VAL((_bin_cmd), (_cmd)->Imm2,   MASK_IMM2,   SHIFT_IMM2)
-#define SET_RM(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RM,     MASK_RM,     SHIFT_RM)
-#define SET_RT(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RT,     MASK_RT,     SHIFT_RT)
-#define SET_RS(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RS,     MASK_RS,     SHIFT_RS)
-#define SET_RD(_bin_cmd, _cmd)                         SET_CMD_VAL((_bin_cmd), (_cmd)->RD,     MASK_RD,     SHIFT_RD)
-#define SET_OPCODE(_bin_cmd, _cmd)                     SET_CMD_VAL((_bin_cmd), (_cmd)->Opcode, MASK_OPCODE, SHIFT_OPCODE)
+#define SET_IMM1(_bin_cmd, _cmd)                       (_cmd)->Imm1     =   CONVERT_12_BIT_TO_32_BIT_UNSIGNED(SET_CMD_VAL((_bin_cmd), MASK_IMM1,   SHIFT_IMM1))
+#define SET_IMM2(_bin_cmd, _cmd)                       (_cmd)->Imm2     =   CONVERT_12_BIT_TO_32_BIT_UNSIGNED(SET_CMD_VAL((_bin_cmd), MASK_IMM2,   SHIFT_IMM2))
+#define SET_RM(_bin_cmd, _cmd)                         (_cmd)->RM       =   SET_CMD_VAL((_bin_cmd), MASK_RM,     SHIFT_RM)
+#define SET_RT(_bin_cmd, _cmd)                         (_cmd)->RT       =   SET_CMD_VAL((_bin_cmd), MASK_RT,     SHIFT_RT)
+#define SET_RS(_bin_cmd, _cmd)                         (_cmd)->RS       =   SET_CMD_VAL((_bin_cmd), MASK_RS,     SHIFT_RS)
+#define SET_RD(_bin_cmd, _cmd)                         (_cmd)->RD       =   SET_CMD_VAL((_bin_cmd), MASK_RD,     SHIFT_RD)
+#define SET_OPCODE(_bin_cmd, _cmd)                     (_cmd)->Opcode   =   SET_CMD_VAL((_bin_cmd), MASK_OPCODE, SHIFT_OPCODE)
 
 #define READ_REGISTERS_VALUE(_cmd, _rs_value, _rt_value, _rm_value)     _rs_value = registers_values[(_cmd)->RS];\
                                                                         _rt_value = registers_values[(_cmd)->RT];\
                                                                         _rm_value = registers_values[(_cmd)->RM];
 #define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          _rs_value = registers_values[(_cmd)->RS];\
                                                                         _rt_value = registers_values[(_cmd)->RT];
-
+#define CONVERT_12_BIT_TO_32_BIT_UNSIGNED(x)                            (x >> 11) == 0 ? x : -1 ^ 0xFFF | x
 /*  
  * TODO: 
  * parse command into parts and enter command struct
@@ -124,8 +124,8 @@ typedef struct {
     uint32_t RS;
     uint32_t RT;
     uint32_t RM;
-    uint32_t Imm1;
-    uint32_t Imm2;
+    int Imm1;
+    int Imm2;
 } Command;
 
 typedef struct {
@@ -154,15 +154,14 @@ void read_irq2in_file();
 void write_dmemout_file();
 void write_regout_file();
 void write_cycles_file();
-void write_leds_file();
 void write_diskout_file();
 void write_monitor_file();
 void write_monitor_yuv_file();
 
 void add_to_trace_file(Command *cmd); /** need to add args */
 void add_to_hwregtrace_file(); /** need to add args */
-void addToDisplay7SegTraceFile();
-void addToledsTraceFile();
+void add_to_display_7_seg_trace_file();
+void add_to_leds_trace_file();
 
 void simulator();
 bool call_action(Command *cmd);

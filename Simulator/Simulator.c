@@ -4,7 +4,7 @@
 #include "files.h"
 
 
-uint32_t registers_values[NUM_OF_REGISTERS] = { 0 };
+int registers_values[NUM_OF_REGISTERS] = { 0 };
 uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
 uint32_t memory[MEM_SIZE] = { 0 };
 uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
@@ -44,17 +44,20 @@ void simulator() {
     initInterrupts();
     initDisk();
 
-    while (TRUE)
-    {
+    while (TRUE) {
         registers_values[0] = 0; /* set $zero to 0 */
+        interruptHandler();
+        if (commands[pc] == NULL) {
+            assert(FALSE);
+            break;
+        }
         if (call_action(commands[pc]) == FALSE) {
+            io_registers_values[clks]++;
             break;
         }
         diskHandler();
-        io_registers_values[clks]++;
         updateInterrupts();
-        interruptHandler();
-
+        io_registers_values[clks]++;
         pc++;
     }
     
@@ -63,7 +66,7 @@ void simulator() {
 bool call_action(Command *cmd) {
     registers_values[1] = cmd->Imm1;
     registers_values[2] = cmd->Imm2;
-    traceToFile(cmd);
+    add_to_trace_file(cmd);
     switch (cmd->Opcode)
     {
         case op_add:
@@ -125,30 +128,34 @@ bool call_action(Command *cmd) {
             break;
         case op_in:
             in(cmd);
+            add_to_hwregtrace_file(cmd);
             break;
         case op_out:
             out(cmd);
+            add_to_hwregtrace_file(cmd);
             break;
         case op_halt:
+            return FALSE;
+        default:
             assert(FALSE);
             return FALSE;
     }
     return TRUE;
 }
 void add(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     registers_values[cmd->RD] = rs_value + rt_value + rm_value;
 }
 
 void sub(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     registers_values[cmd->RD] = rs_value - rt_value - rm_value;
 }
 
 void mac(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     registers_values[cmd->RD] = rs_value * rt_value + rm_value;
 }
@@ -195,7 +202,7 @@ void srl(Command *cmd) {
 }
 
 void beq(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value == rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -203,7 +210,7 @@ void beq(Command *cmd) {
 }
 
 void bne(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value != rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -211,7 +218,7 @@ void bne(Command *cmd) {
 }
 
 void blt(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value < rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -219,7 +226,7 @@ void blt(Command *cmd) {
 }
 
 void bgt(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value > rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -227,7 +234,7 @@ void bgt(Command *cmd) {
 }
 
 void ble(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value <= rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -235,7 +242,7 @@ void ble(Command *cmd) {
 }
 
 void bge(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     if (rs_value >= rt_value) {
         pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
@@ -243,7 +250,7 @@ void bge(Command *cmd) {
 }
 
 void jal(Command *cmd) {
-    uint32_t rm_value = registers_values[cmd->RM];
+    int rm_value = registers_values[cmd->RM];
     registers_values[cmd->RD] = pc + 1;
     pc = (rm_value & MASK_12_LOWER_BITS) - 1; /** pc will increment in main loop by one */
 }
@@ -261,7 +268,8 @@ void sw(Command *cmd) {
 }
 
 void reti(Command *cmd) {
-    pc = io_registers_values[irqreturn] - 1; /** pc will increment in main loop by one */
+    pc = io_registers_values[irqreturn]; /** pc will increment in main loop by one */
+    return_from_interrupt();
 }
 
 void in(Command *cmd) {
@@ -277,40 +285,39 @@ void in(Command *cmd) {
 }
 
 void out(Command *cmd) {
+    int is_changed = FALSE;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    
-    /* If command changes leds status, append to ledsFile */
-    if ( ( rs_value + rt_value == leds ) && ( io_registers_values [ leds ] != rm_value ) ) {
-        addToledsTraceFile();
-    }
     /* If command set monitorcmd to 1, change monitor status */
-    else if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
+    if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
-    else if ( ( rs_value + rt_value == display7seg ) && ( io_registers_values[ display7seg ] != rm_value ) ) {
-        addToDisplay7SegTraceFile();
-    }
 
+    is_changed = io_registers_values[display7seg] != rm_value;
     io_registers_values[rs_value + rt_value] = rm_value;
+
+    if ((rs_value + rt_value == display7seg) && is_changed) {
+        add_to_display_7_seg_trace_file();
+    }
+    /* If command changes leds status, append to ledsFile */
+    else if ((rs_value + rt_value == leds) && is_changed) {
+        add_to_leds_trace_file();
+    }
 }
 
-void addToledsTraceFile() {
+void add_to_leds_trace_file() {
     uint32_t time = registers_values[ timercurrent ]; 
     uint32_t leds_status = io_registers_values[ leds ];
     char leds_status_str[ BUFFER_SIZE ]; 
-    sprintf( leds_status_str, "%d ", time );
-    sprintf( leds_status_str, "%08X", leds_status );
+    sprintf_s( leds_status_str, BUFFER_SIZE, "%d %08x", io_registers_values[clks], leds_status );
     fputs( leds_status_str, context.led_fd );
     fputs( "\r\n", context.led_fd );
 }
 
-void addToDisplay7SegTraceFile() {
-    uint32_t time = registers_values[ timercurrent ];
+void add_to_display_7_seg_trace_file() {
     uint32_t display7Seg_status = io_registers_values[ display7seg ];
     char disp7seg_status_str[ BUFFER_SIZE ];
-    sprintf(disp7seg_status_str, "%d ", time );
-    sprintf( disp7seg_status_str, "%08X", display7Seg_status);
+    sprintf_s( disp7seg_status_str, BUFFER_SIZE, "%d %08x", io_registers_values[ clks ], display7Seg_status );
     fputs( disp7seg_status_str, context.display7reg_fd );
     fputs( "\r\n", context.display7reg_fd );
 }
@@ -336,7 +343,7 @@ void changeMonitor() {
 
 void print_pixel_monitor_file(int row, int col) {
     char pixel_status_str[PIXEL_BUFFER_SIZE];
-    sprintf_s(pixel_status_str, LEDS_BUFFER_SIZE , "%02X", monitor[row][col]);
+    sprintf_s(pixel_status_str, PIXEL_BUFFER_SIZE, "%02X", monitor[row][col]);
     fputs(pixel_status_str, context.led_fd);
     fputs("\r\n", context.monitor_fd);
 }
@@ -376,7 +383,7 @@ void read_imemin_file() {
 void parse_cmd_line(char *line, int local_pc) {
     uint64_t bin_cmd = 0;
     Command *cmd;
-    bin_cmd = (uint64_t) strtol(line, NULL, 16);
+    bin_cmd = (uint64_t) strtoll(line, NULL, 16);
     cmd = (Command*) malloc(sizeof(Command));
     assert( cmd != NULL);
 
@@ -422,20 +429,20 @@ bool isLineEmptyOrNoteOnly( char *line ) {
 }
 
 void set_FD_context( char *argv[] ) {
-    assert(fopen_s(&(context.imemin_fd),        argv[ 1 ], "a+") == 0);     assert(context.imemin_fd != NULL);
-    assert(fopen_s(&(context.dmemin_fd),        argv[ 2 ], "a+") == 0);     assert(context.dmemin_fd != NULL);
-    assert(fopen_s(&(context.diskin_fd),        argv[ 3 ], "a+") == 0);     assert(context.diskin_fd != NULL);
-    assert(fopen_s(&(context.irq2in_fd),        argv[ 4 ], "a+") == 0);     assert(context.irq2in_fd != NULL);
-    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "a+") == 0);     assert(context.dmemout_fd != NULL);
-    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "a+") == 0);     assert(context.regout_fd != NULL);
-    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "a+") == 0);     assert(context.trace_fd != NULL);
-    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "a+") == 0);     assert(context.hwregtrace_fd != NULL);
-    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "a+") == 0);     assert(context.cycles_fd != NULL);
-    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "a+") == 0);    assert(context.led_fd != NULL);
-    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "a+") == 0);    assert(context.display7reg_fd != NULL);
-    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "a+") == 0);    assert(context.diskout_fd != NULL);
-    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "a+") == 0);    assert(context.monitor_fd != NULL);
-    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "ab+") == 0);   assert(context.monitor_yuv_fd != NULL);
+    assert(fopen_s(&(context.imemin_fd),        argv[ 1 ], "r") == 0);     assert(context.imemin_fd != NULL);
+    assert(fopen_s(&(context.dmemin_fd),        argv[ 2 ], "r") == 0);     assert(context.dmemin_fd != NULL);
+    assert(fopen_s(&(context.diskin_fd),        argv[ 3 ], "r") == 0);     assert(context.diskin_fd != NULL);
+    assert(fopen_s(&(context.irq2in_fd),        argv[ 4 ], "r") == 0);     assert(context.irq2in_fd != NULL);
+    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "w+") == 0);     assert(context.dmemout_fd != NULL);
+    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "w+") == 0);     assert(context.regout_fd != NULL);
+    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "w+") == 0);     assert(context.trace_fd != NULL);
+    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "w+") == 0);     assert(context.hwregtrace_fd != NULL);
+    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "w+") == 0);     assert(context.cycles_fd != NULL);
+    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "w+") == 0);    assert(context.led_fd != NULL);
+    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "w+") == 0);    assert(context.display7reg_fd != NULL);
+    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "w+") == 0);    assert(context.diskout_fd != NULL);
+    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "w+") == 0);    assert(context.monitor_fd != NULL);
+    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
 }
 
 void close_FD_context() {
@@ -468,9 +475,10 @@ int main( int argc, char *argv[] ) {
 
     simulator();
 
-    cyclesToFile();
-    registersToFile();
-    memoryToFile();
+    write_cycles_file();
+    write_regout_file();
+    write_dmemout_file();
+    write_diskout_file();
 
     close_FD_context();
 

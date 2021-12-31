@@ -13,18 +13,18 @@ void updateInterrupts() {  // need to be called at the end of every "main loop" 
 }
 
 void updateIrq0(){
-    if(io_registers_values[timerenable]){
+    if(io_registers_values[timerenable]) {
         if(io_registers_values[timercurrent] >= io_registers_values[timermax]){
             io_registers_values[irq0status] = 1;
             io_registers_values[timercurrent] = 0;
         }
-       else{
+    } else {
         io_registers_values[timercurrent]++;
        }
     }
 }
 void updateIrq2(){
-    if(irq2Counter < irq2ArrLen){
+    if(irq2Counter < irq2ArrLen) {
         if(io_registers_values[clks] == irq2Arr[irq2Counter]){
             io_registers_values[irq2status] = 1;
             irq2Counter++;
@@ -37,17 +37,23 @@ int interruptHandler() // need to be called at the end of every "main loop" iter
     int irq = (io_registers_values[irq0enable] && io_registers_values[irq0status]) ||
               (io_registers_values[irq1enable] && io_registers_values[irq1status]) ||
               (io_registers_values[irq2enable] && io_registers_values[irq2status]);
-    if (irq)
-    {
-        if (isInterrupt)
-        {
-            return;
+    if (irq) {
+        if (isInterrupt) {
+            return FALSE;
         }
         io_registers_values[irqreturn] = pc;
         pc = io_registers_values[irqhandler];
         isInterrupt = 1;
+        return TRUE;
     }
-    return;
+    return FALSE;
+}
+
+void return_from_interrupt() {
+    isInterrupt = 0;
+    if (!interruptHandler()) {
+        pc--;
+    }
 }
 
 void initInterrupts()// need to be called once before the "main loop"
