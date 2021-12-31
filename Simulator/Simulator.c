@@ -285,22 +285,21 @@ void in(Command *cmd) {
 }
 
 void out(Command *cmd) {
-    int is_changed = FALSE;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+
     /* If command set monitorcmd to 1, change monitor status */
     if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
 
-    is_changed = io_registers_values[display7seg] != rm_value;
     io_registers_values[rs_value + rt_value] = rm_value;
 
-    if ((rs_value + rt_value == display7seg) && is_changed) {
+    if ((rs_value + rt_value == display7seg) && (io_registers_values[display7seg] != rm_value) {
         add_to_display_7_seg_trace_file();
     }
     /* If command changes leds status, append to ledsFile */
-    else if ((rs_value + rt_value == leds) && is_changed) {
+    else if ((rs_value + rt_value == leds) && io_registers_values[leds] != rm_value) {
         add_to_leds_trace_file();
     }
 }
