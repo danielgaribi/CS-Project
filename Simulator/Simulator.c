@@ -434,15 +434,15 @@ void set_FD_context( char *argv[] ) {
     assert(fopen_s(&(context.dmemin_fd),        argv[ 2 ], "r") == 0);      assert(context.dmemin_fd != NULL);
     assert(fopen_s(&(context.diskin_fd),        argv[ 3 ], "r") == 0);      assert(context.diskin_fd != NULL);
     assert(fopen_s(&(context.irq2in_fd),        argv[ 4 ], "r") == 0);      assert(context.irq2in_fd != NULL);
-    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "a+") == 0);     assert(context.dmemout_fd != NULL);
-    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "a+") == 0);     assert(context.regout_fd != NULL);
-    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "a+") == 0);     assert(context.trace_fd != NULL);
-    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "a+") == 0);     assert(context.hwregtrace_fd != NULL);
-    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "a+") == 0);     assert(context.cycles_fd != NULL);
-    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "a+") == 0);    assert(context.led_fd != NULL);
-    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "a+") == 0);    assert(context.display7reg_fd != NULL);
-    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "a+") == 0);    assert(context.diskout_fd != NULL);
-    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "a+") == 0);    assert(context.monitor_fd != NULL);
+    assert(fopen_s(&(context.dmemout_fd),       argv[ 5 ], "w+") == 0);     assert(context.dmemout_fd != NULL);
+    assert(fopen_s(&(context.regout_fd),        argv[ 6 ], "w+") == 0);     assert(context.regout_fd != NULL);
+    assert(fopen_s(&(context.trace_fd),         argv[ 7 ], "w+") == 0);     assert(context.trace_fd != NULL);
+    assert(fopen_s(&(context.hwregtrace_fd),    argv[ 8 ], "w+") == 0);     assert(context.hwregtrace_fd != NULL);
+    assert(fopen_s(&(context.cycles_fd),        argv[ 9 ], "w+") == 0);     assert(context.cycles_fd != NULL);
+    assert(fopen_s(&(context.led_fd),           argv[ 10 ], "w+") == 0);    assert(context.led_fd != NULL);
+    assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "w+") == 0);    assert(context.display7reg_fd != NULL);
+    assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "w+") == 0);    assert(context.diskout_fd != NULL);
+    assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "w+") == 0);    assert(context.monitor_fd != NULL);
     //assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
 }
 
