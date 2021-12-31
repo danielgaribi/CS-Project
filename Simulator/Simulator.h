@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 int pc;
-uint64_t innerClks;
+uint64_t innerClks; // TODO: fix sprintf from %d
 
 /* Defines and Macros*/
 #define bool                int
