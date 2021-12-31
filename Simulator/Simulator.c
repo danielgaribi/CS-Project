@@ -352,7 +352,12 @@ void print_pixel_monitor_file(int row, int col) {
 void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
     uint8_t pixel = monitor[row][col];
     fwrite(&pixel, sizeof(uint8_t), 1, context.monitor_yuv_fd);
-    fputs("\r", context.monitor_yuv_fd);
+    if ( col == 255 ) {
+        fputs("\r", context.monitor_yuv_fd);
+    }
+    else {
+        fputs(" ", context.monitor_yuv_fd);
+    }
 }
 
 void write_monitor_file() {
