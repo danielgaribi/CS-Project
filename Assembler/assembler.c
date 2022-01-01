@@ -65,7 +65,7 @@ void setCommand( int pc, char **CMDArgs ) {
             break;
         default:
             printf("ERROR: too many arguments!\n");
-            exit( 1 ); // How to exit in case of error?
+            exit( 1 );
     }
     }
 }
@@ -117,7 +117,7 @@ void printMemoryDB( void ) {
     }
 }
 
-/* Return False if line is empty or contain only note, Otherwise return True*/
+// Return False if line is empty or contain only note, Otherwise return True
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound ) {
     for ( int i = 0; i < strlen( line ); i++ ) {
         char tmp = line[ i ];
@@ -160,22 +160,22 @@ void setMemory( char *line ) {
     char *word, *token;
     word = strtok_s( line, " \t", &next );
     if ( strcmp( word, ".word" ) != 0 ) {
-        printf("command with dot and not .word found!\n"); /* TODO: debug */
+        printf("command with dot and not .word found!\n");
         return;
     }
     MemoryDB[ memIndex ].location = (int)strtol(strtok_s( NULL, " ", &next ), NULL, 0);
     token = strtok_s( NULL, " ", &next );
-    strcpy_s( MemoryDB[ memIndex ].value, BUFFER_MAX_SIZE, token ); /* TODO: debug */
+    strcpy_s( MemoryDB[ memIndex ].value, BUFFER_MAX_SIZE, token );
     memIndex++;
 }
 
 bool isLableValid( char *lable ) { 
     char ch = lable[ 0 ];
-    /* Check if the first char is a letter */
+    // Check if the first char is a letter
     if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')) ) {
         return FALSE;
     }
-    /* Check if the all other chars are letters or digits */
+    // Check if the all other chars are letters or digits
     for (int i = 0; i < strlen(lable); i++) {
         ch = lable[i];
         if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ('0' <= ch && ch <= '9'))) {
@@ -192,17 +192,17 @@ void parseLine( char *line ) {
     int cmdPartIndex;
 
     if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
-        return;
+        return; // continue to next line
     }
 
-    /* Split line into lable+command and note */
+    // Split line into lable+command and note
     token = strtok_s( line, "#", &next );
     note = strtok_s( NULL, "#", &next );
-    if ( note != NULL ) { /* line with comment */
-        strcpy_s(CommandDB[GlobalPC].Note, BUFFER_MAX_SIZE, note ); /* TODO: change to 50? lable max length is 50*/
+    if ( note != NULL ) { // line with comment
+        strcpy_s(CommandDB[GlobalPC].Note, BUFFER_MAX_SIZE, note );
     }
 
-    /* Split lable+command to 2 seperated parts */
+    // Split lable+command to 2 seperated parts
     bool isLableFound = FALSE;
     bool isCMDFound = FALSE;
     bool isDotWordFound = FALSE;
@@ -227,7 +227,7 @@ void parseLine( char *line ) {
         fullCommand = token;
     }
 
-    /* Split command into opcode, registers, imms... */
+    // Split command into opcode, registers, imms..
     token = strtok_s( fullCommand, ",", &next );
 
     cmdPartIndex = 3;
@@ -236,14 +236,14 @@ void parseLine( char *line ) {
     commandStrings = (char**) calloc(sizeof(char*), NUM_OF_CMD_FIELDS + 1);
     assert(commandStrings != NULL);
 
-    while ( token2 != NULL ) { /* Set the rest of command */
+    while ( token2 != NULL ) { // Set the rest of command
         commandStrings[ cmdPartIndex++ ] = token2;
         token2 = strtok_s( NULL, ",", &next );
     }
     token2 = strtok_s( token, " ", &next );
-    commandStrings[ OPCODE_INDEX ] = token2; /* Set OPCODE register */
+    commandStrings[ OPCODE_INDEX ] = token2; // Set OPCODE register
     token2 = strtok_s( NULL, ",", &next );
-    commandStrings[ RD_INDEX ] = token2; /* Set RD register */
+    commandStrings[ RD_INDEX ] = token2; // Set RD register
 
     setCommand(GlobalPC, commandStrings );
     CommandDB[GlobalPC].PC = GlobalPC;
@@ -273,12 +273,12 @@ uint64_t parse_cmd_to_uint64_t( Command cmd ) {
 int convert_imm_to_int(char *imm) {
     int i;
     
-    /** Check if imm is label, if so return label's pc */ 
+    // Check if imm is label, if so return label's pc
     for (i = 0; i < DB_MAX_NUM_LABLES; i++) {
         if (LableDB[ i ].is_created == FALSE) {
             break;
         }
-        if (strcmp(LableDB[ i ].Lable_name, imm) == 0) { /** if imm is label i */
+        if (strcmp(LableDB[ i ].Lable_name, imm) == 0) { // if imm is label i
             return LableDB[ i ].PC;
         }
     }
@@ -354,11 +354,11 @@ int main( int argc, char *argv[] ) {
     char *asm_file_name, *imemin_file, *dmemin_file;
     FILE* file;
 
-    /* Read program.asm (program file) - find labels's pc and update Lable2PC DB */
+    // Read program.asm (program file) - find labels's pc and update Lable2PC DB
     assert( argc == 4 );
-    asm_file_name = argv[1];
-    imemin_file = argv[2];
-    dmemin_file = argv[3];
+    asm_file_name   = argv[1];
+    imemin_file     = argv[2];
+    dmemin_file     = argv[3];
 
     assert(fopen_s(&file, asm_file_name, "a+") == 0);
     assert( file != NULL );
@@ -368,15 +368,6 @@ int main( int argc, char *argv[] ) {
         parseLine( line );
     }    
     fclose( file );
-    
-     //printf("print Command DB status:\n"); /* TODO: debug */
-     //printCommandDB();
-    
-     //printf("\nprint Lable DB status:\n"); /* TODO: debug */
-     //printLableDB();
-    
-     //printf("\nprint Memory DB status:\n"); /* TODO: debug */
-     //printMemoryDB();
 
     print_imemin(imemin_file);
     print_dmemin(dmemin_file);

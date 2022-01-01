@@ -13,7 +13,8 @@
 #define FALSE               0
 #define DB_NUM_COLS         2
 #define DB_MAX_NUM_LABLES   128
-#define BUFFER_MAX_SIZE     1024 /* TODO: change to 500 - it is given that line max length is 500 */
+#define BUFFER_MAX_SIZE     500
+#define LABLE_BUFFER_SIZE   50
 #define MAX_NUM_OF_COMMANDS 4096
 #define OPCODE_INDEX        1
 #define RD_INDEX            2
@@ -53,11 +54,6 @@
 #define SET_RS(_cmd, _rs)                           SET_CMD_COMP((_cmd), (_rs),     MASK_RS,  SHIFT_RS)
 #define SET_RD(_cmd, _rd)                           SET_CMD_COMP((_cmd), (_rd),     MASK_RD,  SHIFT_RD)
 #define SET_OPCODE(_cmd, _opcode)                   SET_CMD_COMP((_cmd), (_opcode), MASK_OPCODE,  SHIFT_OPCODE)
-
-/*  
- * TODO: 
- * parse command into parts and enter command struct
- */
 
 /* Structs and Enums*/
 typedef char* Register;
