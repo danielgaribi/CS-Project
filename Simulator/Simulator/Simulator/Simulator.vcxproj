@@ -139,15 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\disk.c" />
-    <ClCompile Include="..\..\files.c" />
-    <ClCompile Include="..\..\interrupt.c" />
     <ClCompile Include="..\..\Simulator.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\disk.h" />
-    <ClInclude Include="..\..\files.h" />
-    <ClInclude Include="..\..\interrupt.h" />
     <ClInclude Include="..\..\Simulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
