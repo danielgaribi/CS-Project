@@ -277,6 +277,7 @@ void reti(Command *cmd) {
 void in(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    
     if (rs_value + rt_value == monitorcmd) {
         registers_values[cmd->RD] = 0; /* Reading from monitorcmd register return 0 */
     }
