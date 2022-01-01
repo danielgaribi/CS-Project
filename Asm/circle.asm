@@ -1,4 +1,4 @@
-.word 0x100 10
+.word 0x100 100
 
 os:
     sll $sp, $imm1, $imm2, $zero, 1, 11             # set $sp = 1 << 11 = 2048
@@ -10,11 +10,11 @@ main:
     add $t0, $zero, $zero, $zero, 0 ,0              # row = $t0 = 0
 
 ForLoopRow:
-    bge $zero, $t0, $s0, $imm2, 0, Return           # if ( row >= MonitorSize{=256} ) jump to Return
+    beq $zero, $t0, $s0, $imm2, 0, Return           # if ( row == MonitorSize{=256} ) jump to Return
     add $t1, $zero, $zero, $zero, 0 ,0              # col = $t1 = 0
 
 ForLoopCol: 
-    bge $zero, $t1, $s0, $imm2, 0, EndLoopRow       # if ( col >= MonitorSize{=256} ) jump to EndLoopRow
+    beq $zero, $t1, $s0, $imm2, 0, EndLoopRow       # if ( col == MonitorSize{=256} ) jump to EndLoopRow
     sub $s1, $t0, $imm1, $zero, 128, 0              # distFromCenter = row - 128
     mac $s1, $s1, $s1, $zero, 0, 0                  # distFromCenter = ( row - 128 ) * ( row - 128 )
     sub $t2, $t1, $imm1, $zero, 128, 0              # $t2 = col - 128
@@ -27,15 +27,16 @@ EndLoopCol:
     beq $zero, $zero, $zero, $imm2, 0, ForLoopCol   # jump to ForLoopCol
 
 EndLoopRow:
-    add $t0, $imm, $zero, $zero, 1, 0               # row++ 
+    add $t0, $t0, $imm1, $zero, 1, 0                # row++ 
     beq $zero, $zero, $zero, $imm2, 0, ForLoopRow   # jump to ForLoopRow 
 
 PaintWhite: 
     sll $t2, $t0, $imm1, $zero, 8, 0                # $t2 = row << 8
     add $t2, $t2, $t1, $zero, 0, 0                  # $t2 = row << 8 + col { offset in monitor }
     out $zero, $imm1, $zero, $t2, 20, 0             # IORegister[ monitoraddr = 20 ] = $t2 = offset monitor[ row ][ col ]
-    out $zero, $imm1, $zero, $imm, 21, 255          # IORegister[ monitordata = 21 ] = 255 { White }
-    out $zero, $imm1, $imm, $imm2, 22, 1            # IORegister[ monitorcmd = 22 ] = 1 { Write command }
+    out $zero, $imm1, $zero, $imm2, 21, 255         # IORegister[ monitordata = 21 ] = 255 { White }
+    out $zero, $imm1, $zero, $imm2, 22, 1           # IORegister[ monitorcmd = 22 ] = 1 { Write command }
+    out $zero, $imm1, $zero, $imm2, 22, 0           # IORegister[ monitorcmd = 22 ] = 0 { Write command }
     beq $zero, $zero, $zero, $imm2, 0, EndLoopCol   # jump to EndLoopCol 
 
 Return: 
