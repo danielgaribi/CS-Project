@@ -355,7 +355,6 @@ int main( int argc, char *argv[] ) {
 
     assert(fopen_s(&file, asm_file_name, "a+") == 0);
     assert( file != NULL );
-    int i = 0;
     char line[ BUFFER_MAX_SIZE ];
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
         parseLine( line );
