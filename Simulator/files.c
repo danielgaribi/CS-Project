@@ -59,7 +59,7 @@ void add_to_hwregtrace_file(Command *cmd) {
     }    
 	*/
 
-	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08x", 
+	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08x",
 		innerClks, mode, io_registers_names[index], val);
 	fputs(line, context.hwregtrace_fd);
 	fputs("\r", context.hwregtrace_fd);
