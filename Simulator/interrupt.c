@@ -14,12 +14,10 @@ void updateInterrupts() {  // need to be called at the end of every "main loop" 
 
 void updateIrq0(){
     if(io_registers_values[timerenable]) {
+        io_registers_values[timercurrent]++;
         if(io_registers_values[timercurrent] >= io_registers_values[timermax]){
             io_registers_values[irq0status] = 1;
             io_registers_values[timercurrent] = 0;
-        }
-        else {
-            io_registers_values[timercurrent]++;
         }
     }
 }

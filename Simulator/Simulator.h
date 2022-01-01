@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 int pc;
-uint64_t innerClks; // TODO: fix sprintf from %d
+uint32_t innerClks; // TODO: fix sprintf from %d
 
 /* Defines and Macros*/
 #define bool                int
@@ -18,7 +18,7 @@ uint64_t innerClks; // TODO: fix sprintf from %d
 #define MEM_SIZE            4096
 #define NUM_OF_OPCODES      22
 #define NUM_OF_REGISTERS    16
-#define NUM_OF_IO_REGISTERS 22
+#define NUM_OF_IO_REGISTERS 23
 #define CMD_LENGTH_HEX      12
 #define MEM_LENGTH_HEX      8
 #define BUFFER_SIZE         32 
