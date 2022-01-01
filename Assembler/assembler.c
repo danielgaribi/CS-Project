@@ -190,24 +190,20 @@ void parseLine( char *line ) {
     char *lableName, *fullCommand, *note, *token, *token2;
     char** commandStrings;
     int cmdPartIndex;
-
     if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
         return; // continue to next line
     }
-
     // Split line into lable+command and note
     token = strtok_s( line, "#", &next );
     note = strtok_s( NULL, "#", &next );
     if ( note != NULL ) { // line with comment
         strcpy_s(CommandDB[GlobalPC].Note, BUFFER_MAX_SIZE, note );
     }
-
     // Split lable+command to 2 seperated parts
     bool isLableFound = FALSE;
     bool isCMDFound = FALSE;
     bool isDotWordFound = FALSE;
     classifiedCMD( token, &isLableFound, &isCMDFound, &isDotWordFound ); 
-
     if ( isLableFound ) {
         lableName = strtok_s( token, ":", &next );
         if (!isLableValid) {
@@ -229,7 +225,6 @@ void parseLine( char *line ) {
 
     // Split command into opcode, registers, imms..
     token = strtok_s( fullCommand, ",", &next );
-
     cmdPartIndex = 3;
     token2 = strtok_s( NULL, ",", &next );
 
@@ -244,11 +239,9 @@ void parseLine( char *line ) {
     commandStrings[ OPCODE_INDEX ] = token2; // Set OPCODE register
     token2 = strtok_s( NULL, ",", &next );
     commandStrings[ RD_INDEX ] = token2; // Set RD register
-
     setCommand(GlobalPC, commandStrings );
     CommandDB[GlobalPC].PC = GlobalPC;
     GlobalPC++;
-
     free(commandStrings);
 }
 
@@ -362,7 +355,7 @@ int main( int argc, char *argv[] ) {
 
     assert(fopen_s(&file, asm_file_name, "a+") == 0);
     assert( file != NULL );
-
+    int i = 0;
     char line[ BUFFER_MAX_SIZE ];
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
         parseLine( line );
