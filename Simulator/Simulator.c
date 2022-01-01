@@ -277,6 +277,7 @@ void reti(Command *cmd) {
 void in(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    
     if (rs_value + rt_value == monitorcmd) {
         registers_values[cmd->RD] = 0; /* Reading from monitorcmd register return 0 */
     }
@@ -290,15 +291,16 @@ void out(Command *cmd) {
     int is_changed = FALSE;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+
     /* If command set monitorcmd to 1, change monitor status */
     if ( (rs_value + rt_value == monitorcmd ) && ( rm_value == 1 ) ) {
         changeMonitor();
     }
 
-    is_changed = io_registers_values[display7seg] != rm_value;
+    is_changed = io_registers_values[rs_value + rt_value] != rm_value;
     io_registers_values[rs_value + rt_value] = rm_value;
 
-    if ((rs_value + rt_value == display7seg) && is_changed) {
+    if ((rs_value + rt_value == display7seg) && is_changed ) {
         add_to_display_7_seg_trace_file();
     }
     /* If command changes leds status, append to ledsFile */

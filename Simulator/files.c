@@ -49,13 +49,15 @@ void add_to_hwregtrace_file(Command *cmd) {
         mode = "READ";
     }
     index = registers_values[cmd->RS] + registers_values[cmd->RT];
+	val = io_registers_values[index];
 
+	/* TODO: before change
     if(cmd->Opcode == op_in){
         val = io_registers_values[cmd->RD];
     } else{
         val = io_registers_values[index];
     }    
-		
+	*/
 
 	sprintf_s(line, 4*CMD_LENGTH_HEX + 4, "%d %s %s %08x", 
 		innerClks, mode, io_registers_names[index], val);
