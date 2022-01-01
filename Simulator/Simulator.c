@@ -296,13 +296,14 @@ void out(Command *cmd) {
         changeMonitor();
     }
 
+    is_changed = io_registers_values[rs_value + rt_value] != rm_value;
     io_registers_values[rs_value + rt_value] = rm_value;
 
-    if ((rs_value + rt_value == display7seg) && (io_registers_values[display7seg] != rm_value)) {
+    if ((rs_value + rt_value == display7seg) && is_changed ) {
         add_to_display_7_seg_trace_file();
     }
     /* If command changes leds status, append to ledsFile */
-    else if ((rs_value + rt_value == leds) && io_registers_values[leds] != rm_value) {
+    else if ((rs_value + rt_value == leds) && is_changed) {
         add_to_leds_trace_file();
     }
 }
