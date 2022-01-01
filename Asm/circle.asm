@@ -1,8 +1,10 @@
+.word 0x100 10
+
 os:
     sll $sp, $imm1, $imm2, $zero, 1, 11             # set $sp = 1 << 11 = 2048
 
 main: 
-    lw $a0, $zero, $imm2, 0, 0x100                  # load radius from 0x100 to $a0
+    lw $a0, $zero, $imm2, $zero, 0, 0x100           # load radius from 0x100 to $a0
     mac $s2, $a0, $a0, $zero, 0, 0                  # $s2 = radiusSquerd = radius * radius
     sll $s0, $imm1, $imm2, $zero, 1, 8              # $s0 = MonitorSize = 256
     add $t0, $zero, $zero, $zero, 0 ,0              # row = $t0 = 0
