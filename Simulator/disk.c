@@ -1,18 +1,29 @@
 #include "disk.h"
 #include "Simulator.h"
 
-int diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
+uint32_t diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
 
 void initDisk() {
     diskTimer = 0;
-    char line[MAX_DISK_LINE_LENGTH];
+    char line[MAX_DISK_LINE_LENGTH+2];
     int lineIndex = 0;
-    while (fgets(line, MAX_LINE_LENGTH, context.diskin_fd) != NULL)
+    int sector, sectorIndex;
+    memset(diskMemory, 0, sizeof(diskMemory));
+
+    while (fgets(line, MAX_LINE_LENGTH+2, context.diskin_fd) != NULL)
     {
-       int sector = lineIndex / SECTOR_NUMBER;
-       int sectorIndex = lineIndex % SECTOR_SIZE;
-       diskMemory[sector][sectorIndex] = (int) strtol(line, NULL, 16);
-       lineIndex++;
+        if (isLineEmptyOrNoteOnly(line) == FALSE) {
+            continue;
+        }
+        sector = lineIndex / SECTOR_SIZE;
+        sectorIndex = lineIndex % SECTOR_SIZE;
+        if (sector < SECTOR_NUMBER && sectorIndex < SECTOR_SIZE) {
+            diskMemory[sector][sectorIndex] = (uint32_t)strtol(line, NULL, 16);
+            lineIndex++;
+        }
+        else {
+            break;
+        }
     }
 }
 
