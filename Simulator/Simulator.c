@@ -364,7 +364,7 @@ void write_monitor_file() {
     for (int row = 0; row < MONITOR_SIZE; row++) {
         for (int col = 0; col < MONITOR_SIZE; col++) {
             print_pixel_monitor_file(row, col);
-            //print_pixel_monitor_yuv_file(row, col);
+            print_pixel_monitor_yuv_file(row, col);
         }
     }
 }
@@ -448,7 +448,7 @@ void set_FD_context( char *argv[] ) {
     assert(fopen_s(&(context.display7reg_fd),   argv[ 11 ], "w+") == 0);    assert(context.display7reg_fd != NULL);
     assert(fopen_s(&(context.diskout_fd),       argv[ 12 ], "w+") == 0);    assert(context.diskout_fd != NULL);
     assert(fopen_s(&(context.monitor_fd),       argv[ 13 ], "w+") == 0);    assert(context.monitor_fd != NULL);
-    //assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
+    assert(fopen_s(&(context.monitor_yuv_fd),   argv[ 14 ], "wb+") == 0);   assert(context.monitor_yuv_fd != NULL);
 }
 
 void close_FD_context() {
@@ -465,7 +465,7 @@ void close_FD_context() {
     fclose(context.display7reg_fd);
     fclose(context.diskout_fd);
     fclose(context.monitor_fd);
-    //fclose(context.monitor_yuv_fd);
+    fclose(context.monitor_yuv_fd);
 }
 
 int main( int argc, char *argv[] ) {
