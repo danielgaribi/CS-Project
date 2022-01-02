@@ -17,7 +17,7 @@ for:
 
 		add $s1, $s0, $imm1 ,$zero, 1, 0					# s1 = s0 + 1
 		out $zero, $imm1, $zero, $zero, 16, 0				# diskbuffer = 0
-		out $zero, $imm1, $zero, $s1, 15, 0				# disksector = s1
+		out $zero, $imm1, $zero, $s1, 15, 0					# disksector = s1
 		out $zero, $imm1, $zero, $imm2, 14, 2				# diskcmd = 2 
 		jal $ra, $zero, $zero, $imm2, 0, wait				# wait
 
@@ -27,7 +27,7 @@ for:
 wait:														# while diskstatus == 1
 		in $s1, $imm1, $zero, $zero, 17, 0					# s1 = diskstatus
 		beq $zero, $s1, $imm1, $imm2, 1, wait				# if s1 == 1 jump to wait
-		beq $zero, $s1, $imm1, $imm2, 0, $ra				# if s1 == 0 jump back
+		beq $zero, $s1, $imm1, $ra, 0, 0					# if s1 == 0 jump back
 
 return:
         lw $s1, $sp, $imm2, $zero, 0, 0                     # restore $s1
