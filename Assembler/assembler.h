@@ -130,6 +130,7 @@ void printCMD( Command CMD );
 /* Assembler Input/Output */
 void setCommand( int pc, char **CMDArg );
 void parseLine( char *line );
+char* cleanWord(char* word);
 bool isLineEmptyOrNoteOnly( char *line );
 void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );

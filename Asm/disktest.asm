@@ -10,7 +10,7 @@
 for:	
         blt $zero, $s0, $zero, $imm2, 0, return             # if s0 < 0 jump to return
        
-		out $zero, $imm1, $zero, $zero, 16, 0				# diskbuffer = 0
+ 	 	out $zero, $imm1, $zero, $zero, 16, 0				# diskbuffer = 0
 		out $zero, $imm1, $zero, $s0, 15, 0					# disksector = s0
 		out $zero, $imm1, $zero, $imm2, 14, 1				# diskcmd = 1
 		jal $ra, $zero, $zero, $imm2, 0, wait				# wait 

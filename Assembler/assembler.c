@@ -12,7 +12,8 @@ void setCommand( int pc, char **CMDArgs ) {
     char next[BUFFER_MAX_SIZE] = { 0 };
     char* token;
     for ( int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++ ) {
-        char *cleanCMDArg = strtok_s( CMDArgs[ cmdPart ], " \t", &next );
+        char* cleanCMDArg = cleanWord(CMDArgs[cmdPart]);
+        //char* cleanCMDArg = strtok_s( CMDArgs[ cmdPart ], " \t", &next );
 
         switch ( cmdPart ) {
         case OPCODE_INDEX:
@@ -132,6 +133,19 @@ bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isD
         }
     }
     return FALSE;
+}
+
+char* cleanWord( char *word ) {
+    // Trim spaces and tabs from beginning 
+    while (word[0] != '\0') {
+        if ( (word[0] == ' ') || (word[0] == '\t') ) {
+            word++;
+        }
+        else {
+            break;
+        }
+    }
+    return word;
 }
 
 bool isLineEmptyOrNoteOnly( char *line ) {
