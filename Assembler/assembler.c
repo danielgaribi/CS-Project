@@ -144,6 +144,14 @@ char* cleanWord( char *word ) {
             break;
         }
     }
+
+    // Trim spaces and tabs from end 
+    int size = strlen(word);
+    for ( int i = 0; i < size; i++ ) {
+        if ( ( word[ i ] == ' ' ) || ( word[ i ] == '\t' ) ) {
+            word[ i ] = '\0';
+        }
+    }
     return word;
 }
 
@@ -297,7 +305,7 @@ void print_imemin( char *imemin_file ) {
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX+1];
     FILE* file;    
-    assert(fopen_s(&file, imemin_file, "a+") == 0);
+    assert(fopen_s(&file, imemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < GlobalPC; i++) {
@@ -343,7 +351,7 @@ void print_dmemin( char *dmemin_file ) {
     FILE *file;
     char mem_value_string[MEM_LENGTH_HEX+1];
     get_memory_array(&memory, &size);
-    assert(fopen_s(&file, dmemin_file, "a+") == 0);
+    assert(fopen_s(&file, dmemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < size; i++) {
@@ -366,7 +374,7 @@ int main( int argc, char *argv[] ) {
     imemin_file     = argv[2];
     dmemin_file     = argv[3];
 
-    assert(fopen_s(&file, asm_file_name, "a+") == 0);
+    assert(fopen_s(&file, asm_file_name, "w+") == 0);
     assert( file != NULL );
     char line[ BUFFER_MAX_SIZE ];
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
