@@ -539,11 +539,11 @@ void write_diskout_file() {
             for (j = 0; j < zero_counter; j++) {
                 sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
                 fputs(word, context.diskout_fd);
-                fputs("\r\n", context.diskout_fd);
+                fputs("\r", context.diskout_fd);
             }
             sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
             fputs(word, context.diskout_fd);
-            fputs("\r\n", context.diskout_fd);
+            fputs("\r", context.diskout_fd);
             zero_counter = 0;
         }
     }
