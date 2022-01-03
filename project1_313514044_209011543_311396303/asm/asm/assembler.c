@@ -275,7 +275,7 @@ void print_imemin(char* imemin_file) {
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX + 1];
     FILE* file;
-    assert(fopen_s(&file, imemin_file, "a+") == 0);
+    assert(fopen_s(&file, imemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < GlobalPC; i++) {
@@ -321,7 +321,7 @@ void print_dmemin(char* dmemin_file) {
     FILE* file;
     char mem_value_string[MEM_LENGTH_HEX + 1];
     get_memory_array(&memory, &size);
-    assert(fopen_s(&file, dmemin_file, "a+") == 0);
+    assert(fopen_s(&file, dmemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < size; i++) {
