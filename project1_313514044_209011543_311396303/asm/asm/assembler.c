@@ -108,7 +108,7 @@ char* cleanEndWord(char* word) {
     // Trim spaces and tabs from end 
     int size = strlen(word);
     for (int i = 0; i < size; i++) {
-        if ((word[i] == ' ') || (word[i] == '\t')) {
+        if ((word[i] == ' ') || (word[i] == '\t') || ((word[i] == '\n')) || ((word[i] == '\r'))) {
             word[i] = '\0';
         }
     }
