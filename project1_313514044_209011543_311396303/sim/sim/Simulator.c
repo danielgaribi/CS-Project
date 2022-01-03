@@ -279,7 +279,7 @@ void lw(Command* cmd) {
     int value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     GET_MEMORY_VALUE(rs_value + rt_value, value);
-    value += +rm_value;
+    value += rm_value;
     SET_REGISTER_VALUE(cmd->RD, value);
 }
 
@@ -287,7 +287,7 @@ void sw(Command* cmd) {
     int rs_value, rt_value, rm_value;
     int value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    GET_MEMORY_VALUE(cmd->RD, value);
+    GET_REGISTER_VALUE(cmd->RD, value);
     value += rm_value;
     SET_MEMORY_VALUE(rs_value + rt_value, value);
 }
