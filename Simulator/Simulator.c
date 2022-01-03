@@ -52,8 +52,9 @@ void simulator() {
         registers_values[0] = 0; /* set $zero to 0 */
         interruptHandler();
 
-        if (commands[pc] == NULL) { /* TODO: remove???? */
-            assert(FALSE);
+        if (commands[pc] == NULL) {
+            io_registers_values[clks]++;
+            innerClks++;
             break;
         }
 
@@ -165,7 +166,6 @@ void mac(Command *cmd) {
     int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
     SET_REGISTER_VALUE(cmd->RD, rs_value * rt_value + rm_value);
-    registers_values[cmd->RD] = rs_value * rt_value + rm_value;
 }
 
 void and(Command *cmd) {
@@ -189,6 +189,9 @@ void xor(Command *cmd) {
 void sll(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    if (((int) rt_value) < 0) {
+        return;
+    }
     SET_REGISTER_VALUE(cmd->RD, rs_value << rt_value);
 }
 
@@ -196,6 +199,9 @@ void sra(Command *cmd) {
     uint32_t rs_value, rt_value;
     uint32_t value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    if (((int)rt_value) < 0) {
+        return;
+    }
     /**
      * R[rd] = R[rs] >>(logical) R[rt], then the msb is 0.
      * do R[rs] and 1 << 31 to get R[rs] msb with 31 0 to the right.
@@ -208,6 +214,9 @@ void sra(Command *cmd) {
 void srl(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
+    if (((int)rt_value) < 0) {
+        return;
+    }
     SET_REGISTER_VALUE(cmd->RD, rs_value >> rt_value);
 }
 
@@ -338,12 +347,10 @@ void changeMonitor() {
 
     /* Validate */
     if ((row < 0) || (row > MONITOR_SIZE) || (col < 0) || (col > MONITOR_SIZE) || ( addr >> 16 != 0 )) {
-        printf("monitor addr is invalid!\n");
-        exit(EXIT_FAILURE); /* TODO: check how to exit on failure */
+        return;
     }
     else if (io_registers_values[monitordata] > 255) {
-        printf("monitor data is invalid\n");
-        exit(EXIT_FAILURE); /* TODO: check how to exit on failure */
+        return;
     }
     monitor[row][col] = io_registers_values[monitordata];
 }
@@ -355,7 +362,7 @@ void print_pixel_monitor_file(int row, int col) {
     fputs("\r", context.monitor_fd);
 }
 
-void print_pixel_monitor_yuv_file(int row, int col) { /* TODO: check */
+void print_pixel_monitor_yuv_file(int row, int col) {
     uint8_t pixel = monitor[row][col];
     fwrite(&pixel, sizeof(uint8_t), 1, context.monitor_yuv_fd);
 }
@@ -685,14 +692,6 @@ void add_to_hwregtrace_file(Command* cmd) {
     }
     index = registers_values[cmd->RS] + registers_values[cmd->RT];
     GET_IO_REGISTER_VALUE(index, val);
-
-    /* TODO: before change
-    if(cmd->Opcode == op_in){
-        val = io_registers_values[cmd->RD];
-    } else{
-        val = io_registers_values[index];
-    }
-    */
 
     sprintf_s(line, 4 * CMD_LENGTH_HEX + 4, "%d %s %s %08x",
         innerClks, mode, io_registers_names[index], val);
