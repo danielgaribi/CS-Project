@@ -479,7 +479,7 @@ void initIrq2()
 
 void initDisk() {
     diskTimer = 0;
-    char line[MAX_DISK_LINE_LENGTH + 2];
+    char line[MAX_LINE_LENGTH + 2];
     int lineIndex = 0;
     int value;
     int sector, sectorIndex;
@@ -695,10 +695,12 @@ void add_to_hwregtrace_file(Command* cmd) {
     index = registers_values[cmd->RS] + registers_values[cmd->RT];
     GET_IO_REGISTER_VALUE(index, val);
 
-    sprintf_s(line, 4 * CMD_LENGTH_HEX + 4, "%d %s %s %08x",
-        innerClks, mode, io_registers_names[index], val);
-    fputs(line, context.hwregtrace_fd);
-    fputs("\r", context.hwregtrace_fd);
+    if (index < NUM_OF_IO_REGISTERS) { 
+        sprintf_s(line, 4 * CMD_LENGTH_HEX + 4, "%d %s %s %08x",
+            innerClks, mode, io_registers_names[index], val);
+        fputs(line, context.hwregtrace_fd);
+        fputs("\r", context.hwregtrace_fd);
+    }
 }
 
 void add_to_trace_file(Command* cmd) {
