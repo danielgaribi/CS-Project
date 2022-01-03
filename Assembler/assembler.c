@@ -13,7 +13,6 @@ void setCommand( int pc, char **CMDArgs ) {
     char* token;
     for ( int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++ ) {
         char* cleanCMDArg = cleanWord(CMDArgs[cmdPart]);
-        //char* cleanCMDArg = strtok_s( CMDArgs[ cmdPart ], " \t", &next );
 
         switch ( cmdPart ) {
         case OPCODE_INDEX:
@@ -143,6 +142,14 @@ char* cleanWord( char *word ) {
         }
         else {
             break;
+        }
+    }
+    
+    // Trim spaces and tabs from end 
+    int size = strlen(word);
+    for (int i = 0; i < size; i++) {
+        if ((word[i] == ' ') || (word[i] == '\t')) {
+            word[i] = '\0';
         }
     }
     return word;
