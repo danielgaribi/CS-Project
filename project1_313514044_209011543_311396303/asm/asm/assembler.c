@@ -277,7 +277,6 @@ void print_imemin(char* imemin_file) {
 
     for (i = 0; i < GlobalPC; i++) {
         cmd = parse_cmd_to_uint64_t(CommandDB[i]);
-        printf("cmd: %012I64X\n", cmd); // TODO
         sprintf_s(cmd_string, CMD_LENGTH_HEX + 1, "%012I64X", cmd);
         fputs(cmd_string, file);
         fputs("\n", file);
