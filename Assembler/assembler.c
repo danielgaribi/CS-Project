@@ -13,7 +13,6 @@ void setCommand( int pc, char **CMDArgs ) {
     char* token;
     for ( int cmdPart = 1; cmdPart <= NUM_OF_CMD_FIELDS; cmdPart++ ) {
         char* cleanCMDArg = cleanWord(CMDArgs[cmdPart]);
-        //char* cleanCMDArg = strtok_s( CMDArgs[ cmdPart ], " \t", &next );
 
         switch ( cmdPart ) {
         case OPCODE_INDEX:
@@ -136,9 +135,15 @@ bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isD
 }
 
 char* cleanWord( char *word ) {
+    word = cleanStartWord(word);
+    word = cleanEndWord(word);
+    return word;
+}
+
+char* cleanStartWord(char* word) {
     // Trim spaces and tabs from beginning 
     while (word[0] != '\0') {
-        if ( (word[0] == ' ') || (word[0] == '\t') ) {
+        if ((word[0] == ' ') || (word[0] == '\t')) {
             word++;
         }
         else {
@@ -148,9 +153,20 @@ char* cleanWord( char *word ) {
     return word;
 }
 
+char* cleanEndWord(char* word) {
+    // Trim spaces and tabs from end 
+    int size = strlen(word);
+    for (int i = 0; i < size; i++) {
+        if ((word[i] == ' ') || (word[i] == '\t')) {
+            word[i] = '\0';
+        }
+    }
+    return word;
+}
+
 bool isLineEmptyOrNoteOnly( char *line ) {
     while ( line[ 0 ] != '\0' ) {
-        if ( line[ 0 ] == '\n' || line[ 0 ] == '#' ) {
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '#') {
             return FALSE;
         } else if ( line[ 0 ] == ' ' || line[ 0 ] == '\t' ) {
             line++;
@@ -249,6 +265,8 @@ void parseLine( char *line ) {
         commandStrings[ cmdPartIndex++ ] = token2;
         token2 = strtok_s( NULL, ",", &next );
     }
+    
+    token = cleanStartWord(token);
     token2 = strtok_s( token, " ", &next );
     commandStrings[ OPCODE_INDEX ] = token2; // Set OPCODE register
     token2 = strtok_s( NULL, ",", &next );
