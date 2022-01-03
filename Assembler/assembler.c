@@ -56,64 +56,15 @@ void setCommand( int pc, char **CMDArgs ) {
             }
             break;
         case IMM1_INDEX: // keep in string and handle in second round 
-            token = strtok_s(cleanCMDArg, " \t \n", &next);
-            strcpy_s(CommandDB[pc].Imm1, BUFFER_MAX_SIZE, token );
+            strcpy_s(CommandDB[pc].Imm1, BUFFER_MAX_SIZE, cleanCMDArg);
             break;
         case IMM2_INDEX:
-            token = strtok_s(cleanCMDArg, " \t \n", &next);
-            strcpy_s(CommandDB[pc].Imm2, BUFFER_MAX_SIZE, token );
+            strcpy_s(CommandDB[pc].Imm2, BUFFER_MAX_SIZE, cleanCMDArg);
             break;
         default:
             printf("ERROR: too many arguments!\n");
             exit( 1 );
     }
-    }
-}
-
-void printCMD( Command CMD ) { 
-    printf("PC: %d\t", CMD.PC );
-    printf("Opcode: %s\t", opcodes[ CMD.Opcode ] );
-    printf("RD: %s\t", registers[CMD.RD] );
-    printf("RS: %s\t", registers[CMD.RS] );
-    printf("RT: %s\t", registers[CMD.RT] );
-    printf("RM: %s\t", registers[CMD.RM] );
-    printf("Imm1: %s\t", CMD.Imm1 );
-    printf("Imm2: %s\t", CMD.Imm2 );
-    printf("Lable: %s\t", CMD.Lable );
-    printf("Note: %s", CMD.Note );
-}
-
-void printCommandDB( void ) {
-    for ( int i = 0; i < GlobalPC; i++ ) {
-        printCMD( CommandDB[ i ] );
-    }
-}
-
-void printLable( Lable lable ) { 
-    printf("Lable_name: %s\t", lable.Lable_name );
-    printf("PC: %d\n", lable.PC );
-}
-
-void printLableDB( void ) { 
-    for ( int i = 0; i < lableIndex; i++ ) {
-        if ( LableDB[ i ].Lable_name == NULL ) {
-            return;
-        }
-        printLable( LableDB[ i ] );
-    }
-}
-
-void printMemory( Memory memory ) {
-    printf("location: %d\t", memory.location );
-    printf("value: %s\n", memory.value );
-}
-
-void printMemoryDB( void ) { 
-    for ( int i = 0; i < memIndex; i++ ) {
-        if ( MemoryDB[ i ].value == NULL ) {
-            return;
-        }
-        printMemory( MemoryDB[ i ] );
     }
 }
 
@@ -316,7 +267,7 @@ void print_imemin( char *imemin_file ) {
     uint64_t cmd;
     char cmd_string[CMD_LENGTH_HEX+1];
     FILE* file;    
-    assert(fopen_s(&file, imemin_file, "a+") == 0);
+    assert(fopen_s(&file, imemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < GlobalPC; i++) {
@@ -362,7 +313,7 @@ void print_dmemin( char *dmemin_file ) {
     FILE *file;
     char mem_value_string[MEM_LENGTH_HEX+1];
     get_memory_array(&memory, &size);
-    assert(fopen_s(&file, dmemin_file, "a+") == 0);
+    assert(fopen_s(&file, dmemin_file, "w+") == 0);
     assert(file != NULL);
 
     for (i = 0; i < size; i++) {
@@ -385,7 +336,7 @@ int main( int argc, char *argv[] ) {
     imemin_file     = argv[2];
     dmemin_file     = argv[3];
 
-    assert(fopen_s(&file, asm_file_name, "a+") == 0);
+    assert(fopen_s(&file, asm_file_name, "w+") == 0);
     assert( file != NULL );
     char line[ BUFFER_MAX_SIZE ];
     while ( fgets( line, BUFFER_MAX_SIZE, file ) != NULL ) {
