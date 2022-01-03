@@ -157,7 +157,7 @@ char* cleanWord( char *word ) {
 
 bool isLineEmptyOrNoteOnly( char *line ) {
     while ( line[ 0 ] != '\0' ) {
-        if ( line[ 0 ] == '\n' || line[ 0 ] == '#' ) {
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '#') {
             return FALSE;
         } else if ( line[ 0 ] == ' ' || line[ 0 ] == '\t' ) {
             line++;
