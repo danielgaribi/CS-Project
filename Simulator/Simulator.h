@@ -61,13 +61,23 @@ int diskTimer;
 #define SET_RD(_bin_cmd, _cmd)                                          (_cmd)->RD       =  SET_CMD_VAL((_bin_cmd), MASK_RD,     SHIFT_RD)
 #define SET_OPCODE(_bin_cmd, _cmd)                                      (_cmd)->Opcode   =  SET_CMD_VAL((_bin_cmd), MASK_OPCODE, SHIFT_OPCODE)
 
-#define READ_REGISTERS_VALUE(_cmd, _rs_value, _rt_value, _rm_value)     _rs_value = registers_values[(_cmd)->RS];\
-                                                                        _rt_value = registers_values[(_cmd)->RT];\
-                                                                        _rm_value = registers_values[(_cmd)->RM];
 
-#define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          _rs_value = registers_values[(_cmd)->RS];\
-                                                                        _rt_value = registers_values[(_cmd)->RT];
+#define GET_REGISTER_VALUE(_index, _dest)                               (_dest) = (_index) < NUM_OF_REGISTERS ? registers_values[(_index)] : 0;
+#define SET_REGISTER_VALUE(_index, _value)                              if ((_index) < NUM_OF_REGISTERS) { registers_values[(_index)] = (_value); }
+#define GET_IO_REGISTER_VALUE(_index, _dest)                            (_dest) = (_index) < NUM_OF_IO_REGISTERS ? io_registers_values[(_index)] : 0;
+#define SET_IO_REGISTER_VALUE(_index, _value)                           if ((_index) < NUM_OF_IO_REGISTERS) { io_registers_values[(_index)] = (_value); }
+#define SET_MEMORY_VALUE(_index, _value)                                if ((_index) < MEM_SIZE) { memory[(_index)] = (_value); }
+#define GET_MEMORY_VALUE(_index, _dest)                                 (_dest) = (_index) < MEM_SIZE ? memory[(_index)] : 0;
+#define SET_DISK_VALUE(_sector, _index, _value)                         if ((_sector) < SECTOR_NUMBER && (_index) < SECTOR_SIZE) { diskMemory[(_sector)][(_index)] = (_value); }
+#define GET_DISK_VALUE(_sector, _index, _dest)                          (_dest) = ((_sector) < SECTOR_NUMBER && (_index) < SECTOR_SIZE) ? diskMemory[(_sector)][(_index)] : 0;
 #define CONVERT_12_BIT_TO_32_BIT_UNSIGNED(x)                            (x >> 11) == 0 ? x : -1 ^ 0xFFF | x
+
+#define READ_REGISTERS_VALUE(_cmd, _rs_value, _rt_value, _rm_value)     GET_REGISTER_VALUE((_cmd)->RS, _rs_value);\
+                                                                        GET_REGISTER_VALUE((_cmd)->RT, _rt_value);\
+                                                                        GET_REGISTER_VALUE((_cmd)->RM, _rm_value);
+
+#define READ_REGISTERS_VALUE_NO_RM(_cmd, _rs_value, _rt_value)          GET_REGISTER_VALUE((_cmd)->RS, _rs_value);\
+                                                                        GET_REGISTER_VALUE((_cmd)->RT, _rt_value);
 
 /* Structs and Enums*/
 enum opcode {
