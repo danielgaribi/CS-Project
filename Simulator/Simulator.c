@@ -46,7 +46,7 @@ char* io_registers_names[] = {
 
 void simulator() {
     pc = 0;
-    io_registers_values[clks] = 0;
+    SET_IO_REGISTER_VALUE(clks, 0);
 
     for (; TRUE; io_registers_values[clks]++, innerClks++, pc++) {
         registers_values[0] = 0; /* set $zero to 0 */
@@ -141,9 +141,8 @@ bool call_action(Command *cmd) {
             break;
         case op_halt:
             return FALSE;
-        default:
-            assert(FALSE);
-            return FALSE;
+        default: /* if opcode is illegal don't do anything in this cycle */
+            break;
     }
     return TRUE;
 }
@@ -153,60 +152,63 @@ bool call_action(Command *cmd) {
 void add(Command *cmd) {
     int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = rs_value + rt_value + rm_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value + rt_value + rm_value);
 }
 
 void sub(Command *cmd) {
     int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = rs_value - rt_value - rm_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value - rt_value - rm_value);
 }
 
 void mac(Command *cmd) {
     int rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
+    SET_REGISTER_VALUE(cmd->RD, rs_value * rt_value + rm_value);
     registers_values[cmd->RD] = rs_value * rt_value + rm_value;
 }
 
 void and(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = rs_value & rt_value & rm_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value & rt_value & rm_value);
 }
 
 void or(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = rs_value | rt_value | rm_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value | rt_value | rm_value);
 }
 
 void xor(Command *cmd) {
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = rs_value ^ rt_value ^ rm_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value ^ rt_value ^ rm_value);
 }
 
 void sll(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
-    registers_values[cmd->RD] = rs_value << rt_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value << rt_value);
 }
 
 void sra(Command *cmd) {
     uint32_t rs_value, rt_value;
+    uint32_t value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
     /**
      * R[rd] = R[rs] >>(logical) R[rt], then the msb is 0.
      * do R[rs] and 1 << 31 to get R[rs] msb with 31 0 to the right.
      * Or between them both will reter arithmetic shift
      */
-    registers_values[cmd->RD] = (rs_value >> rt_value) | (rs_value & (1 << 31)); 
+    value = (rs_value >> rt_value) | (rs_value & (1 << 31));
+    SET_REGISTER_VALUE(cmd->RD, value);
 }
 
 void srl(Command *cmd) {
     uint32_t rs_value, rt_value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
-    registers_values[cmd->RD] = rs_value >> rt_value;
+    SET_REGISTER_VALUE(cmd->RD, rs_value >> rt_value);
 }
 
 void beq(Command *cmd) {
@@ -264,37 +266,45 @@ void jal(Command *cmd) {
 }
 
 void lw(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
+    int value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    registers_values[cmd->RD] = memory[rs_value + rt_value] + rm_value;
+    GET_MEMORY_VALUE(rs_value + rt_value, value);
+    value +=+ rm_value;
+    SET_REGISTER_VALUE(cmd->RD, value);
 }
 
 void sw(Command *cmd) {
-    uint32_t rs_value, rt_value, rm_value;
+    int rs_value, rt_value, rm_value;
+    int value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
-    memory[rs_value + rt_value] = rm_value + registers_values[cmd->RD];
+    GET_MEMORY_VALUE(cmd->RD, value);
+    value += rm_value;
+    SET_MEMORY_VALUE(rs_value + rt_value, value);
 }
 
 void reti(Command *cmd) {
-    pc = io_registers_values[irqreturn]; /** pc will increment in main loop by one */
+    GET_IO_REGISTER_VALUE(irqreturn, pc); /** pc will increment in main loop by one */
     return_from_interrupt();
 }
 
 void in(Command *cmd) {
     uint32_t rs_value, rt_value;
+    int value;
     READ_REGISTERS_VALUE_NO_RM(cmd, rs_value, rt_value);
     
     if (rs_value + rt_value == monitorcmd) {
-        registers_values[cmd->RD] = 0; /* Reading from monitorcmd register return 0 */
+        value = 0; /* Reading from monitorcmd register return 0 */
     }
     else {
-        registers_values[cmd->RD] = io_registers_values[rs_value + rt_value];
+        GET_IO_REGISTER_VALUE(rs_value + rt_value, value);
     }
-    
+    SET_REGISTER_VALUE(cmd->RD, value)
 }
 
 void out(Command *cmd) {
     int is_changed = FALSE;
+    int old_value;
     uint32_t rs_value, rt_value, rm_value;
     READ_REGISTERS_VALUE(cmd, rs_value, rt_value, rm_value);
 
@@ -303,8 +313,9 @@ void out(Command *cmd) {
         changeMonitor();
     }
 
-    is_changed = io_registers_values[rs_value + rt_value] != rm_value;
-    io_registers_values[rs_value + rt_value] = rm_value;
+    GET_IO_REGISTER_VALUE(rs_value + rt_value, old_value);
+    is_changed = old_value != rm_value;
+    SET_IO_REGISTER_VALUE(rs_value + rt_value, rm_value);
 
     if ((rs_value + rt_value == display7seg) && is_changed ) {
         add_to_display_7_seg_trace_file();
@@ -463,6 +474,7 @@ void initDisk() {
     diskTimer = 0;
     char line[MAX_DISK_LINE_LENGTH + 2];
     int lineIndex = 0;
+    int value;
     int sector, sectorIndex;
     memset(diskMemory, 0, sizeof(diskMemory));
 
@@ -474,7 +486,8 @@ void initDisk() {
         sector = lineIndex / SECTOR_SIZE;
         sectorIndex = lineIndex % SECTOR_SIZE;
         if (sector < SECTOR_NUMBER && sectorIndex < SECTOR_SIZE) {
-            diskMemory[sector][sectorIndex] = (int) strtoul(line, NULL, 16);
+            value = (int)strtoul(line, NULL, 16);
+            SET_DISK_VALUE(sector, sectorIndex, value);
             lineIndex++;
         }
         else {
@@ -486,19 +499,23 @@ void initDisk() {
 
 void readFromDisk() {
     int sectorIndex;
+    int value;
     int sector = io_registers_values[disksector];
     int memoryPointer = io_registers_values[diskbuffer];
     for (sectorIndex = 0; sectorIndex < SECTOR_SIZE; sectorIndex++) {
-        memory[memoryPointer + sectorIndex] = diskMemory[sector][sectorIndex];
+        GET_DISK_VALUE(sector, sectorIndex, value);
+        SET_MEMORY_VALUE(memoryPointer + sectorIndex, value);
     }
 }
 
 void writeToDisk() {
     int sectorIndex;
+    int value;
     int sector = io_registers_values[disksector];
     int memoryPointer = io_registers_values[diskbuffer];
     for (sectorIndex = 0; sectorIndex < SECTOR_SIZE; sectorIndex++) {
-        diskMemory[sector][sectorIndex] = memory[memoryPointer + sectorIndex];
+        GET_MEMORY_VALUE(memoryPointer + sectorIndex, value);
+        SET_DISK_VALUE(sector, sectorIndex, value);
     }
 }
 
@@ -590,13 +607,15 @@ void parse_cmd_line(char *line, int local_pc) {
 
 void read_dmemin_file() {
     int loc = 0;
+    int value;
     char line[MEM_LENGTH_HEX + 1];
 
     while (fgets(line, MEM_LENGTH_HEX + 1, context.dmemin_fd) != NULL) {
         if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
             continue;
         }
-        memory[loc] = (int) strtoul(line, NULL, 16);
+        value = (int)strtoul(line, NULL, 16);
+        SET_MEMORY_VALUE(loc, value);
         loc++;
     }
 
@@ -605,7 +624,7 @@ void read_dmemin_file() {
 
 bool isLineEmptyOrNoteOnly( char *line ) {
     while ( line[ 0 ] != '\0' ) {
-        if ( line[ 0 ] == '\n' || line[ 0 ] == '#' ) {
+        if ( line[ 0 ] == '\n' || line[ 0 ] == '#' || line[0] == '\r') {
             return FALSE;
         } else if ( line[ 0 ] == ' ' || line[ 0 ] == '\t' ) {
             line++;
@@ -665,7 +684,7 @@ void add_to_hwregtrace_file(Command* cmd) {
         mode = "READ";
     }
     index = registers_values[cmd->RS] + registers_values[cmd->RT];
-    val = io_registers_values[index];
+    GET_IO_REGISTER_VALUE(index, val);
 
     /* TODO: before change
     if(cmd->Opcode == op_in){
