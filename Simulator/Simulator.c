@@ -2,11 +2,11 @@
 
 int registers_values[NUM_OF_REGISTERS] = { 0 };
 uint32_t io_registers_values[NUM_OF_IO_REGISTERS] = { 0 };
-uint32_t memory[MEM_SIZE] = { 0 };
+int memory[MEM_SIZE] = { 0 };
 uint8_t  monitor[MONITOR_SIZE][MONITOR_SIZE] = { 0 };
 Command* commands[MAX_NUM_OF_COMMANDS] = { NULL };
 FD_Context context = { 0 };
-uint32_t diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
+int diskMemory[SECTOR_NUMBER][SECTOR_SIZE];
 
 /* interrupts */
 int isInterrupt;
@@ -474,7 +474,7 @@ void initDisk() {
         sector = lineIndex / SECTOR_SIZE;
         sectorIndex = lineIndex % SECTOR_SIZE;
         if (sector < SECTOR_NUMBER && sectorIndex < SECTOR_SIZE) {
-            diskMemory[sector][sectorIndex] = (uint32_t)strtol(line, NULL, 16);
+            diskMemory[sector][sectorIndex] = (int) strtoul(line, NULL, 16);
             lineIndex++;
         }
         else {
@@ -539,11 +539,11 @@ void write_diskout_file() {
             for (j = 0; j < zero_counter; j++) {
                 sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
                 fputs(word, context.diskout_fd);
-                fputs("\r\n", context.diskout_fd);
+                fputs("\r", context.diskout_fd);
             }
             sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
             fputs(word, context.diskout_fd);
-            fputs("\r\n", context.diskout_fd);
+            fputs("\r", context.diskout_fd);
             zero_counter = 0;
         }
     }
@@ -596,7 +596,7 @@ void read_dmemin_file() {
         if ( isLineEmptyOrNoteOnly( line ) == FALSE ) {
             continue;
         }
-        memory[loc] = (uint32_t) strtol(line, NULL, 16);
+        memory[loc] = (int) strtoul(line, NULL, 16);
         loc++;
     }
 
