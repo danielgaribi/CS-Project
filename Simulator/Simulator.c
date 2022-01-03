@@ -527,10 +527,17 @@ void writeToDisk() {
 }
 
 void diskHandler() {
-
-    if (io_registers_values[diskcmd] != 0) {
+    if (io_registers_values[diskcmd] != 0 && io_registers_values[diskstatus] == 0) {
         io_registers_values[diskstatus] = 1;
-
+        diskTimer = 0;
+        if (io_registers_values[diskcmd] == 1) {
+            readFromDisk();
+        }
+        if (io_registers_values[diskcmd] == 2) {
+            writeToDisk();
+        }
+    }
+    if (io_registers_values[diskstatus] == 1) {
         if (diskTimer < DISK_OPERATION_TIME) {
             diskTimer++;
             return;
@@ -540,13 +547,6 @@ void diskHandler() {
             io_registers_values[diskstatus] = 0;
             io_registers_values[irq1status] = 1;
         }
-        if (io_registers_values[diskcmd] == 1) {
-            readFromDisk();
-        }
-        if (io_registers_values[diskcmd] == 2) {
-            writeToDisk();
-        }
-        diskTimer = 0;
     }
 }
 
@@ -561,7 +561,7 @@ void write_diskout_file() {
                 continue;
             }
             for (j = 0; j < zero_counter; j++) {
-                sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", diskMemory[sector][sectorIndex]);
+                sprintf_s(word, CMD_LENGTH_HEX + 1, "%08X", 0);
                 fputs(word, context.diskout_fd);
                 fputs("\r", context.diskout_fd);
             }
