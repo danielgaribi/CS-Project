@@ -124,9 +124,6 @@ char *registers[] = {
     "$ra"     /* 15 */
 };
 
-/* Debug functions */
-void printCMD( Command CMD );
-
 /* Assembler Input/Output */
 void setCommand( int pc, char **CMDArg );
 void parseLine( char *line );
@@ -134,7 +131,6 @@ char* cleanWord(char* word);
 char* cleanStartWord(char* word);
 char* cleanEndWord(char* word);
 bool isLineEmptyOrNoteOnly( char *line );
-void setLable2PCDB( FILE file );
 bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isDotWordFound );
 void setLable( int pc, char *lableName );
 void setMemory( char *line );
@@ -142,5 +138,4 @@ void print_imemin( char *imemin_file );
 void print_dmemin( char *dmemin_file );
 uint64_t parse_cmd_to_uint64_t( Command cmd );
 int convert_imm_to_int(char *imm);
-bool isLableFound( char *command );
 void get_memory_array(int **memory, int *size);
