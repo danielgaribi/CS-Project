@@ -135,16 +135,25 @@ bool classifiedCMD( char *line, bool *isLableFound, bool *isNoteFound, bool *isD
 }
 
 char* cleanWord( char *word ) {
+    word = cleanStartWord(word);
+    word = cleanEndWord(word);
+    return word;
+}
+
+char* cleanStartWord(char* word) {
     // Trim spaces and tabs from beginning 
     while (word[0] != '\0') {
-        if ( (word[0] == ' ') || (word[0] == '\t') ) {
+        if ((word[0] == ' ') || (word[0] == '\t')) {
             word++;
         }
         else {
             break;
         }
     }
-    
+    return word;
+}
+
+char* cleanEndWord(char* word) {
     // Trim spaces and tabs from end 
     int size = strlen(word);
     for (int i = 0; i < size; i++) {
@@ -256,6 +265,8 @@ void parseLine( char *line ) {
         commandStrings[ cmdPartIndex++ ] = token2;
         token2 = strtok_s( NULL, ",", &next );
     }
+    
+    token = cleanStartWord(token);
     token2 = strtok_s( token, " ", &next );
     commandStrings[ OPCODE_INDEX ] = token2; // Set OPCODE register
     token2 = strtok_s( NULL, ",", &next );
