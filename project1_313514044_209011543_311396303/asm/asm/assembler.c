@@ -173,6 +173,9 @@ void parseLine(char* line) {
     char* lableName, * fullCommand, * note, * token, * token2;
     char** commandStrings;
     int cmdPartIndex;
+
+    line = cleanStartWord(line);
+
     if (isLineEmptyOrNoteOnly(line) == FALSE) {
         return; // continue to next line
     }
